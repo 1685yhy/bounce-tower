@@ -512,16 +512,29 @@ function create(platform){
     cc.font='16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.fillStyle='rgba(255,255,255,0.5)';cc.fillText('来挑战我吧! 微信搜「弹弹塔」',cw/2,ch*0.85);
   }
 
-  function loop(){if(destroyed)return;lastFrameTime=Date.now();update();render();if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=setTimeout(function(){if(Date.now()-lastFrameTime>1500&&!destroyed){console.warn('RAF stalled, restarting');rafId=raf(loop);}},2000);rafId=raf(loop);}
+  var paused=false,bgmWasPlaying=false;
+  function loop(){if(destroyed||paused)return;lastFrameTime=Date.now();update();render();rafId=raf(loop);}
+  function onVisibility(){
+    if(document.hidden){
+      paused=true;bgmWasPlaying=bgmPlaying;bgmStop();
+      if(rafWatchdog){clearTimeout(rafWatchdog);rafWatchdog=null;}
+    }else{
+      paused=false;
+      if(bgmWasPlaying)bgmStart();
+      rafId=raf(loop);
+    }
+  }
   function init(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;pi=Math.floor(Math.random()*pals.length);ci=0;bestScore=loadBest();
-  // Draw first frame immediately (don't wait for RAF)
+  document.addEventListener('visibilitychange',onVisibility);
   try{render();}catch(e){}
   loop();}
   function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();}
-  function destroy(){destroyed=true;persistStats();if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=null;rafId=null;}
+  function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=null;rafId=null;}
+
+  function resizeViewport(w,h){W=w;H=h;}
 
   return{
-    init:init,handleTap:handleTap,reset:reset,revive:revive,destroy:destroy,setMode:setMode,
+    init:init,handleTap:handleTap,reset:reset,revive:revive,destroy:destroy,setMode:setMode,resizeViewport:resizeViewport,
     useTool:useTool,addTool:addTool,getToolCount:getToolCount,
     renderShareCard:renderShareCard,refreshTheme:refreshTheme,unlockSkin:unlockSkin,
     getStatus:function(){return status;},getScore:function(){return score;},getBestScore:function(){return bestScore;},getMode:function(){return mode;},

@@ -89,7 +89,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 'use strict';
 var C=document.getElementById('c'),X=C.getContext('2d');
 
-function rs(){var d=Math.min(devicePixelRatio||1,2);C.width=innerWidth*d;C.height=innerHeight*d;C.style.width=innerWidth+'px';C.style.height=innerHeight+'px';X.setTransform(1,0,0,1,0,0);X.scale(d,d)}
+function rs(){var d=Math.min(devicePixelRatio||1,2);C.width=innerWidth*d;C.height=innerHeight*d;C.style.width=innerWidth+'px';C.style.height=innerHeight+'px';X.setTransform(1,0,0,1,0,0);X.scale(d,d);if(typeof game!=='undefined')game.resizeViewport(innerWidth,innerHeight);}
 addEventListener('resize',rs);rs();
 
 var AC=null;
@@ -132,7 +132,10 @@ initStats.tools.slow=0;initStats.tools.widen=0;initStats.tools.reverse=0;
 game.init();
 
 function buildGrid(){
-  var stars=L('stars',{}),maxUnlocked=1;
+  // 优先读独立 'stars' key；旧版本只有 stats.levelStars 时自动 fallback
+  var stars=L('stars',null);
+  if(!stars||Object.keys(stars).length===0){var st=L('stats',{});stars=st.levelStars||{};}
+  var maxUnlocked=1;
   for(var k in stars){if(stars[k]>=1)maxUnlocked=Math.max(maxUnlocked,parseInt(k)+1)}
   maxUnlocked=Math.min(50,maxUnlocked);
   var h='';
@@ -172,13 +175,12 @@ function startGame(id){
   curLv=id;
   var lv=BounceTower.LEVELS[id-1];
 
-  // 先设工具再 reset/setMode，确保 persistStats 存的是正确值
+  // 先设工具再 setMode（setMode 内部会调用 reset，不需要额外调用）
   var st=game.getStats();
   st.tools.slow=TOOLS_PER_ROUND.slow;
   st.tools.widen=TOOLS_PER_ROUND.widen;
   st.tools.reverse=TOOLS_PER_ROUND.reverse;
 
-  game.reset();
   game.setMode('level',{levelId:lv.id,target:lv.target,speedMul:lv.speedMul});
 
   document.getElementById('home').classList.add('hidden');
@@ -228,8 +230,8 @@ function showPanel(win,score,cb,ly,li,stars,nextLv){
     document.getElementById('psub').textContent=remain>0&&remain<=10?'只差'+remain+'层就过关了! 💪':'目标'+(lv.target||'?')+'层 · 到达'+score+'层';
   }
 
-  // 替换节点清掉旧事件
-  function fresh(id){var el=document.getElementById(id),n=el.cloneNode(true);el.parentNode.replaceChild(n,el);return document.getElementById(id);}
+  // 替换节点清掉旧事件，同时重置 display
+  function fresh(id){var el=document.getElementById(id),n=el.cloneNode(true);n.style.display='';el.parentNode.replaceChild(n,el);return document.getElementById(id);}
   var nb1=fresh('pbtn1'),nb2=fresh('pbtn2'),nb3=fresh('pbtn3');
 
   if(win){
