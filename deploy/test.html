@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Test</title>
+<style>*{margin:0;padding:0}body{background:#fef9f0;font-size:18px;padding:40px;font-family:sans-serif}</style>
+</head>
+<body>
+<h2>测试页面</h2>
+<div id="r1">1. 检查JS是否运行...</div>
+<div id="r2">2. 检查引擎加载...</div>
+<div id="r3">3. 检查Canvas...</div>
+<div id="r4">4. 检查游戏创建...</div>
+<script>
+document.getElementById('r1').textContent='1. ✅ JS正在运行';
+</script>
+<script src="game-engine.js?v=2"></script>
+<script>
+try{
+  if(typeof BounceTower!=='undefined'){
+    document.getElementById('r2').textContent='2. ✅ 引擎加载成功';
+  }else{
+    document.getElementById('r2').textContent='2. ❌ 引擎未加载';
+  }
+  
+  var c=document.createElement('canvas');
+  var x=c.getContext('2d');
+  if(x){
+    document.getElementById('r3').textContent='3. ✅ Canvas正常';
+  }
+  
+  var g=BounceTower.create({
+    ctx:x,width:375,height:667,
+    loadBest:function(){return 0},saveBest:function(){},
+    requestAnimationFrame:function(fn){return setTimeout(fn,16)},playBeep:function(){},
+    onGameOver:function(){},onNewBest:function(){},onAchievement:function(){},onLevelComplete:function(){},onUseTool:function(){},
+    loadStats:function(){return{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0}},
+    saveStats:function(){},getTheme:function(){return'default'}
+  });
+  g.init();
+  document.getElementById('r4').textContent='4. ✅ 游戏创建成功';
+  g.destroy();
+}catch(e){
+  document.getElementById('r4').textContent='4. ❌ '+e.message;
+}
+</script>
+</body>
+</html>

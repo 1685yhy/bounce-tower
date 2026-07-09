@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>弹弹塔 v4.1</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:#fef9f0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script src="shared/game-engine.js"></script>
+<script>
+(function(){
+'use strict';
+var C=document.getElementById('c'),X=C.getContext('2d');
+function rs(){var d=Math.min(devicePixelRatio||1,2);C.width=innerWidth*d;C.height=innerHeight*d;C.style.width=innerWidth+'px';C.style.height=innerHeight+'px';X.setTransform(1,0,0,1,0,0);X.scale(d,d);}
+addEventListener('resize',rs);rs();
+var AC=null;function au(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)()}if(AC.state==='suspended')AC.resume()}
+function beep(f,d,t,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.setValueAtTime(f,AC.currentTime);g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+var levelId=load('bttLevelId',1);
+var lv=BounceTower.LEVELS.find(function(l){return l.id===levelId;})||BounceTower.LEVELS[0];
+
+var game=BounceTower.create({
+ctx:X,width:innerWidth,height:innerHeight,
+loadBest:function(){return load('bttBest',0);},saveBest:function(s){save('bttBest',s);},
+requestAnimationFrame:function(fn){return requestAnimationFrame(fn);},playBeep:beep,
+onGameOver:function(s,c,l,nb,m,li,lt){console.log('GameOver:',s,'/',lt);},
+onNewBest:function(){},onAchievement:function(a){console.log('🏅',a.name);},
+onLevelComplete:function(r){console.log('🎉',r.stars+'star',r.score);save('bttLevelId',(r.levelId||levelId)+1);},
+onUseTool:function(t,r){console.log('🔧',t,'left:',r);},
+loadStats:function(){return load('bttStats',{});},saveStats:function(s){save('bttStats',s);},
+getTheme:function(){return load('bttTheme','default');},
+});
+
+game.setMode('level',{levelId:lv.id,target:lv.target,speedMul:lv.speedMul});
+game.addTool('slow',3);game.addTool('widen',3);
+game.init();
+game.bgmStart(); // 自动开始音乐
+
+function tap(e){e.preventDefault();au();game.handleTap()}
+C.addEventListener('touchstart',tap,{passive:false});C.addEventListener('mousedown',tap);
+document.addEventListener('dblclick',function(e){e.preventDefault()});
+document.addEventListener('keydown',function(e){
+if(e.key==='1')game.useTool('slow');if(e.key==='2')game.useTool('widen');
+if(e.key==='r'){game.reset();game.setMode('level',{levelId:1,target:2,speedMul:0.5});}
+if(e.key==='m'){var on=game.bgmToggle();console.log('🎵 BGM',on?'ON':'OFF');}
+});
+
+console.log('🪜 弹弹塔 v4.1 — 第'+lv.id+'关 · 目标'+lv.target+'层');
+console.log('🐢按1=慢动作 📏按2=加宽 🔄按R=重来 🎵按M=音乐开关');
+})();
+</script>
+</body>
+</html>

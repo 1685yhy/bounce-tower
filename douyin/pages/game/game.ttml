@@ -1,0 +1,119 @@
+<!-- 弹弹塔 v4.1 -->
+<canvas type="2d" id="gameCanvas" bindtouchstart="onTouchStart"></canvas>
+
+<!-- ====== 首页 ====== -->
+<scroll-view class="mask" tt:if="{{showHome}}" scroll-y style="padding-top:60px">
+  <view class="home-header">
+    <view class="home-logo">🪜</view>
+    <view class="home-title">弹弹塔</view>
+    <view class="home-slogan">你能堆多高？</view>
+  </view>
+
+  <!-- 大开始按钮 -->
+  <button class="btn-start" bindtap="onStartTap">🎮 开始游戏</button>
+
+  <!-- 进度 -->
+  <view class="progress-bar">
+    <view class="progress-fill"><view class="progress-inner" style="width:{{levelProgress*100/30}}%"></view></view>
+    <view class="progress-text">{{levelProgress}}/30 · ⭐{{totalStars}}</view>
+  </view>
+
+  <!-- 关卡网格 -->
+  <view class="lv-section">
+    <view class="lv-section-title">🎯 选择关卡</view>
+    <view class="lv-grid">
+      <view class="lv-item {{item.stars>=1?'cleared':''}} {{item.stars>=3?'perfect':''}} {{item.id===nextLevel?'current':''}} {{item.id>maxUnlocked+1?'locked':''}}"
+            tt:for="{{levelList}}" tt:key="id" bindtap="onLevelPick" data-id="{{item.id}}">
+        <view class="lv-num">{{item.id}}</view>
+        <view class="lv-target">{{item.target}}层</view>
+        <view class="lv-stars" tt:if="{{item.stars>0}}"><text tt:for="{{item.stars}}" tt:for-item="s" tt:key="*this">⭐</text></view>
+        <view class="lv-lock" tt:if="{{item.id>maxUnlocked+1}}">🔒</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 每日挑战 -->
+  <view class="daily-card" bindtap="onDailyTap">
+    <view class="daily-icon">📅</view>
+    <view class="daily-info">
+      <view class="daily-label">今日挑战</view>
+      <view class="daily-desc">{{dailyInfo.name}} · 目标 {{dailyInfo.target}} 层</view>
+    </view>
+    <view class="daily-arrow">▶</view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="home-btns">
+    <button class="btn btn-outline btn-sm" bindtap="onSkinPanelOpen">🎨 皮肤</button><button class="btn btn-outline btn-sm" bindtap="onBgmToggle">{{bgmOn?"🔊 音乐":"🔇 音乐"}}</button>
+    <button class="btn btn-outline btn-sm" bindtap="onLeaderboardTap">🏆 排行</button>
+  </view>
+  <view style="height:40px"></view>
+</scroll-view>
+
+<!-- ====== 通关弹窗 ====== -->
+<view class="mask mask-light" tt:if="{{showLevelComplete}}">
+  <view class="panel">
+    <view class="panel-title">🎉 通关!</view>
+    <view class="panel-score">{{finalScore}}</view>
+    <view class="panel-stars">
+      <text tt:for="{{levelStars}}" tt:key="*this">⭐</text>
+      <text class="empty" tt:for="{{3-levelStars}}" tt:key="*this">⭐</text>
+    </view>
+    <view class="panel-detail">{{finalDetail}}</view>
+    <view class="panel-detail" tt:if="{{nextLevelText}}" style="color:#ff8c42;font-weight:600">{{nextLevelText}}</view>
+    <button class="btn btn-red" bindtap="onLevelNext">▶ 下一关</button>
+    <button class="btn btn-green" bindtap="onShareTap">📤 分享战绩</button>
+    <button class="btn btn-outline" bindtap="onBackHome">🏠 返回首页</button>
+  </view>
+</view>
+
+<!-- ====== 失败弹窗 ====== -->
+<view class="mask mask-light" tt:if="{{showGameOver}}">
+  <view class="panel">
+    <view class="panel-title">{{gameOverTitle}}</view>
+    <view class="panel-score">{{finalScore}}</view>
+    <view class="panel-newbest" tt:if="{{isNewBest}}">🏆 新纪录!</view>
+    <view class="panel-hint" tt:if="{{showNearMiss}}">{{nearMissText}}</view>
+    <view class="panel-detail">{{finalDetail}}</view>
+    <button class="btn btn-gold" tt:if="{{canRevive}}" bindtap="onReviveTap">💎 看广告复活</button>
+    <button class="btn btn-red" bindtap="onRestartTap">🔄 {{restartLabel}}</button>
+    <button class="btn btn-green" bindtap="onShareTap">📤 分享得道具</button>
+    <button class="btn btn-outline" bindtap="onBackHome">🏠 返回首页</button>
+  </view>
+</view>
+
+<!-- ====== 道具栏 ====== -->
+<view class="toolbar" tt:if="{{showToolbar}}">
+  <view class="tool-btn {{slowCount>0?'':'empty'}}" bindtap="onToolSlow"><view class="tool-icon">🐢</view><view class="tool-count">×{{slowCount}}</view></view>
+  <view class="tool-btn {{widenCount>0?'':'empty'}}" bindtap="onToolWiden"><view class="tool-icon">📏</view><view class="tool-count">×{{widenCount}}</view></view>
+</view>
+
+<!-- ====== 成就 ====== -->
+<view class="achieve-toast" tt:if="{{showAchievement}}">
+  <view class="achieve-card"><view class="achieve-icon">{{achievement.icon}}</view><view class="achieve-name">{{achievement.name}}</view><view class="achieve-desc">{{achievement.desc}}</view></view>
+</view>
+
+<!-- ====== 排行 ====== -->
+<view class="mask mask-dark" tt:if="{{showLeaderboard}}">
+  <view class="sheet">
+    <view class="sheet-title">🏆 好友排行榜</view>
+    <scroll-view class="sheet-list" scroll-y>
+      <view class="rank-item" tt:for="{{rankList}}" tt:key="index"><view class="rank-num">{{item.rank}}</view><image class="rank-avatar" src="{{item.avatar}}" mode="aspectFill"/><view class="rank-name">{{item.name}}</view><view class="rank-score">{{item.score}} 层</view></view>
+      <view style="text-align:center;color:#ccc;font-size:13px;padding:30px" tt:if="{{rankList.length===0}}">暂无排行数据</view>
+    </scroll-view><button class="btn btn-outline" bindtap="onLeaderboardClose" style="margin-top:10px">关闭</button>
+  </view>
+</view>
+
+<!-- ====== 皮肤 ====== -->
+<view class="mask mask-dark" tt:if="{{showSkinPanel}}">
+  <view class="sheet">
+    <view class="sheet-title">🎨 选择皮肤</view>
+    <scroll-view class="sheet-list" scroll-y>
+      <view class="skin-item {{item.id===currentSkin?'active':''}} {{item.unlocked?'':'locked'}}" tt:for="{{skinList}}" tt:key="id" bindtap="onSkinSelect" data-id="{{item.id}}">
+        <view class="skin-swatch"><view class="dot" tt:for="{{item.colors}}" tt:for-item="c" tt:key="*this" style="background:{{c}}"/></view>
+        <view class="skin-name">{{item.name}}</view>
+        <view class="skin-badge {{item.unlocked?'free':''}}">{{item.unlocked?'✓ 已解锁':'💎 看广告解锁'}}</view>
+      </view>
+    </scroll-view><button class="btn btn-outline" bindtap="onSkinPanelClose" style="margin-top:8px">关闭</button>
+  </view>
+</view>
