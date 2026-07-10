@@ -62,45 +62,70 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .grid-section-label{width:100%;text-align:left;font-size:10px;font-weight:700;color:#d5cec2;padding:10px 2px 2px;letter-spacing:1px}
 
 /* ===== 游戏HUD ===== */
-#hud{position:absolute;top:max(12px,env(safe-area-inset-top));left:0;width:100%;z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+#hud{position:absolute;top:max(10px,env(safe-area-inset-top));right:0;z-index:5;padding:0 12px;pointer-events:none}
 #hud.hidden{display:none}
-#hud-left{font-size:12px;color:rgba(0,0,0,0.4);max-width:45%}
-#hud-right{display:flex;gap:8px}
-.hud-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform .1s cubic-bezier(0.34,1.56,0.64,1)}
+#hud-right{display:flex;gap:6px}
+.hud-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:transform .1s cubic-bezier(0.34,1.56,0.64,1)}
 .hud-btn:active{transform:scale(0.88)}
 
 /* ===== 工具栏 ===== */
-#tools{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:10px}
+#tools{position:absolute;bottom:calc(26px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:12px}
 #tools.hidden{display:none}
-.tool-btn{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,0.92);border:2px solid #e8e0d0;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.08);line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1),border-color .12s}
+.tool-btn{width:72px;height:60px;border-radius:18px;background:rgba(255,255,255,0.95);border:2px solid #efe8dc;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1),border-color .15s,opacity .15s}
 .tool-btn:active{transform:scale(0.88);border-color:#ff6b6b}
-.tool-btn:disabled{opacity:0.28}
-.tool-icon{font-size:20px;line-height:1}
-.tool-count{font-size:10px;color:#aaa;font-weight:600}
-.tool-btn:not(:disabled) .tool-count{color:#ff6b6b}
+.tool-btn:disabled{opacity:0.22}
+.tool-icon{font-size:22px;line-height:1}
+.tool-count{font-size:18px;font-weight:900;color:#ff6b6b;line-height:1}
+.tool-btn:disabled .tool-count{color:#ccc}
 
-/* ===== 面板（通关/失败/暂停/成就/每日/主题/成就列表) ===== */
+/* ===== 结果面板 — 羊了个羊风格 ===== */
+#panel{position:absolute;top:0;left:0;width:100%;height:100%;z-index:15;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px calc(30px + env(safe-area-inset-bottom))}
+#panel.hidden{display:none}
+.panel-fail,.panel-win{width:100%;max-width:310px;border-radius:28px;padding:28px 22px 20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.1);animation:panelIn .35s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes panelIn{0%{opacity:0;transform:scale(0.85) translateY(20px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.panel-fail{background:#fff}
+.panel-win{background:linear-gradient(180deg,#fff,#fefcf8)}
+.pf-emoji{font-size:48px;margin-bottom:4px}
+.pf-title{font-size:20px;font-weight:900;color:#555;margin-bottom:8px}
+.pf-big{font-size:64px;font-weight:900;color:#ff6b6b;line-height:1;margin-bottom:2px}
+.pf-label{font-size:11px;color:#bbb;margin-bottom:2px}
+.pf-close{font-size:13px;color:#999;margin-bottom:14px}
+.pf-close strong{color:#ff6b6b}
+.pf-actions button{width:100%;padding:14px 0;border-radius:50px;font-size:16px;font-weight:800;border:none;cursor:pointer;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1);margin-bottom:8px}
+.pf-actions button:last-child{margin-bottom:0}
+.pf-actions button:active{transform:scale(0.95)}
+.pf-btn-main{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+.pf-btn-share{background:#fff;color:#888;border:1.5px solid #e8e0d0!important}
+.pf-btn-sub{background:transparent;color:#ccc;font-size:13px;padding:8px!important}
+
+/* 通关面板专属 */
+.pw-emoji{font-size:48px;margin-bottom:2px}
+.pw-title{font-size:22px;font-weight:900;color:#e67e00;margin-bottom:6px}
+.pw-stars{font-size:32px;letter-spacing:4px;margin-bottom:6px}
+.pw-detail{font-size:12px;color:#bbb;margin-bottom:10px}
+.pw-progress{height:5px;background:#f0e8dc;border-radius:3px;margin:0 0 6px;overflow:hidden}
+.pw-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f97316,#e67e00)}
+.pw-labels{display:flex;justify-content:space-between;font-size:9px;color:#ccc;margin-bottom:14px}
+.pw-actions button{width:100%;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1);margin-bottom:8px}
+.pw-actions button:last-child{margin-bottom:0}
+.pw-actions button:active{transform:scale(0.95)}
+.pw-btn-next{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+.pw-btn-share{background:#fff;color:#888;border:1.5px solid #e8e0d0!important;font-size:14px;font-weight:600}
+.pw-retry{display:block;text-align:center;font-size:12px;color:#ccc;margin-top:10px;cursor:pointer}
+.pw-retry:active{color:#e8734a}
+
+/* 通用面板（暂停/退出/每日/主题/成就） */
 .overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:15;background:rgba(254,249,240,0.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px calc(20px + env(safe-area-inset-bottom))}
 .overlay.hidden{display:none}
-.card{background:#fff;border-radius:24px;padding:26px 22px 20px;text-align:center;box-shadow:0 14px 50px rgba(0,0,0,0.1);width:100%;max-width:320px}
-.card-title{font-size:22px;color:#444;margin-bottom:6px;font-weight:800}
-.card-score{font-size:54px;font-weight:900;color:#ff6b6b;line-height:1}
-.card-stars{font-size:30px;letter-spacing:6px;margin:8px 0 4px}
-.card-sub{font-size:12px;color:#aaa;margin:4px 0 6px}
-.card-stats{display:flex;gap:0;margin:10px 0;background:#faf8f5;border-radius:12px;overflow:hidden}
-.card-stat{flex:1;padding:8px 4px;text-align:center;border-right:1px solid #f0ece4}
-.card-stat:last-child{border-right:none}
-.card-stat-val{font-size:16px;font-weight:900;color:#e8734a}
-.card-stat-lbl{font-size:9px;color:#bbb;margin-top:1px}
-.card-badge{font-size:11px;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);border-radius:20px;padding:3px 10px;display:inline-block;margin:4px 0 10px}
-.btn-row{display:flex;gap:8px;margin-top:10px}
-.btn-main{flex:1;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
-.btn-main:active{transform:scale(0.95)}
-.btn-sec{flex:1;padding:13px 0;border-radius:50px;font-size:14px;font-weight:600;border:1px solid #e8e0d0;cursor:pointer;background:#fafaf7;color:#666;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
-.btn-sec:active{transform:scale(0.95)}
-.btn-ghost{width:100%;padding:10px 0;border-radius:50px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#bbb;margin-top:4px}
-.btn-ghost{transition:opacity .2s}
-.btn-ghost:active{opacity:0.6}
+.overlay .card{background:#fff;border-radius:28px;padding:26px 22px 20px;text-align:center;box-shadow:0 14px 50px rgba(0,0,0,0.1);width:100%;max-width:310px}
+.overlay .card-title{font-size:20px;color:#444;margin-bottom:8px;font-weight:800}
+.overlay .card-sub{font-size:12px;color:#aaa;margin:4px 0 10px}
+.overlay .btn-main{width:100%;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1);margin-bottom:6px}
+.overlay .btn-main:active{transform:scale(0.95)}
+.overlay .btn-sec{width:100%;padding:13px 0;border-radius:50px;font-size:14px;font-weight:600;border:1px solid #e8e0d0;cursor:pointer;background:#fafaf7;color:#666;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
+.overlay .btn-sec:active{transform:scale(0.95)}
+.overlay .btn-ghost{width:100%;padding:10px 0;border-radius:50px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#bbb;margin-top:4px;transition:opacity .2s}
+.overlay .btn-ghost:active{opacity:0.6}
 
 /* 暂停面板特殊 */
 .pause-icon{font-size:48px;margin-bottom:8px}
@@ -213,7 +238,6 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 <!-- 游戏HUD -->
 <div id="hud" class="hidden">
-  <div id="hud-left"></div>
   <div id="hud-right">
     <button class="hud-btn" id="btnMute" title="音乐">🔊</button>
     <button class="hud-btn" id="btnPause" title="暂停">⏸</button>
@@ -222,24 +246,13 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 <!-- 工具栏 -->
 <div id="tools" class="hidden">
-  <button class="tool-btn" id="btnSlow"><span class="tool-icon">🐢</span><span class="tool-count" id="cntSlow">×1</span></button>
-  <button class="tool-btn" id="btnWiden"><span class="tool-icon">📏</span><span class="tool-count" id="cntWiden">×1</span></button>
-  <button class="tool-btn" id="btnReverse"><span class="tool-icon">🔄</span><span class="tool-count" id="cntReverse">×1</span></button>
+  <button class="tool-btn" id="btnSlow"><span class="tool-icon">🐢</span><span class="tool-count" id="cntSlow">1</span></button>
+  <button class="tool-btn" id="btnWiden"><span class="tool-icon">📏</span><span class="tool-count" id="cntWiden">1</span></button>
+  <button class="tool-btn" id="btnReverse"><span class="tool-icon">🔄</span><span class="tool-count" id="cntReverse">1</span></button>
 </div>
 
-<!-- 通关/失败面板 -->
-<div id="panel" class="overlay hidden">
-  <div class="card">
-    <div class="card-title" id="ptitle"></div>
-    <div class="card-score" id="pscore"></div>
-    <div class="card-stars" id="pstars"></div>
-    <div class="card-stats" id="pstats"></div>
-    <div class="card-badge" id="pbadge" style="display:none"></div>
-    <div class="card-sub" id="psub"></div>
-    <div class="btn-row" id="pbtnRow"></div>
-    <button class="btn-ghost" id="pbtnHome">🏠 返回首页</button>
-  </div>
-</div>
+<!-- 结果面板（动态内容由JS生成） -->
+<div id="panel" class="hidden"></div>
 
 <!-- 暂停面板 -->
 <div id="pausePanel" class="overlay hidden">
@@ -306,7 +319,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
   <div class="tut-skip" id="tutSkip">知道了，开始玩 →</div>
 </div>
 
-<script src="game-engine.js?v=9"></script>
+<script src="game-engine.js?v=10"></script>
 <script>
 (function(){
 'use strict';
@@ -496,9 +509,8 @@ function startGame(id){
   st.tools.widen=TOOLS_PER_ROUND.widen;
   st.tools.reverse=TOOLS_PER_ROUND.reverse;
   game.setMode('level',{levelId:lv.id,target:lv.target,speedMul:lv.speedMul});
-  hide('home');hide('panel');hide('pausePanel');
+  hide('home');hide('panel');hide('pausePanel');hide('quitConfirm');
   show('hud');show('tools');
-  el('hud-left').textContent='第'+lv.id+'关 · '+lv.name;
   el('btnMute').textContent=muteOn?'🔇':'🔊';
   updateTools();
   if(!muteOn)game.bgmStart();
@@ -513,9 +525,8 @@ function startGameDaily(dc){
   st.tools.widen=TOOLS_PER_ROUND.widen;
   st.tools.reverse=TOOLS_PER_ROUND.reverse;
   game.setMode('daily',{levelId:dc.levelId,target:dc.target,speedMul:dc.speedMul});
-  hide('home');hide('panel');hide('pausePanel');
+  hide('home');hide('panel');hide('pausePanel');hide('quitConfirm');
   show('hud');show('tools');
-  el('hud-left').textContent='📅 今日挑战 · '+dc.name;
   el('btnMute').textContent=muteOn?'🔇':'🔊';
   updateTools();
   if(!muteOn)game.bgmStart();
@@ -542,7 +553,7 @@ function resumeGame(){
 
 // ===== 返回首页 =====
 function goHome(){
-  hide('panel');hide('hud');hide('tools');hide('pausePanel');hide('tutorial');
+  hide('panel');hide('hud');hide('tools');hide('pausePanel');hide('tutorial');hide('quitConfirm');
   show('home');
   game.bgmStop();
   game.reset();
@@ -550,71 +561,66 @@ function goHome(){
   refreshDailyPreview();
 }
 
-// ===== 结果面板 =====
+// ===== 羊了个羊风格结果面板 =====
 function showResultPanel(win,score,cb,ly,levelId,starsOrTarget,wasNewBest){
   var stars=win?starsOrTarget:0;
   hide('hud');hide('tools');
-  show('panel');
+  var p=el('panel');p.className='';p.innerHTML='';
 
-  // 首通特别庆祝
-  el('ptitle').textContent=win?(wasNewBest?'🎉 新纪录！':'🎉 通关!'):'😢 挑战失败';
-  el('pscore').textContent=score;
-  el('pstars').textContent=win?('⭐'.repeat(stars)+'☆'.repeat(Math.max(0,3-stars))):'';
-
-  // 详细数据
-  var lv=BounceTower.LEVELS[(levelId||curLv)-1]||{};
-  var pct=levelId<=3?'95%':levelId<=5?'60%':levelId<=10?'30%':levelId<=15?'15%':levelId<=20?'8%':levelId<=25?'3%':levelId<=30?'1%':levelId<=40?'0.1%':'0.01%';
-  el('pstats').innerHTML=
-    '<div class="card-stat"><div class="card-stat-val">'+score+'</div><div class="card-stat-lbl">得分</div></div>'+
-    '<div class="card-stat"><div class="card-stat-val">'+cb+'</div><div class="card-stat-lbl">最高连击</div></div>'+
-    '<div class="card-stat"><div class="card-stat-val">'+ly+'</div><div class="card-stat-lbl">层数</div></div>';
-
-  var badge=el('pbadge');
-  if(win){badge.textContent='🏅 超过了 '+pct+' 的玩家';badge.style.display='inline-block';}
-  else{badge.style.display='none';}
-
-  var sub='';
-  if(win){sub='完美通关需要 '+(Math.ceil(lv.target*1.5))+' 层 (3⭐)';}
-  else{var remain=(lv.target||0)-score;sub=remain>0&&remain<=15?'只差 '+remain+' 层就过关了！💪':'目标 '+(lv.target||'?')+' 层';}
-  el('psub').textContent=sub;
-
-  // 按钮
-  var row=el('pbtnRow');row.innerHTML='';
-  if(win){
-    var isLast=(levelId||curLv)>=50;
-    if(!isLast){
-      var nb1=mkBtn('btn-main','▶ 下一关',function(){startGame(levelId+1);});
-      var nb2=mkBtn('btn-sec','🔁 再战本关',function(){startGame(levelId);});
-      row.appendChild(nb1);row.appendChild(nb2);
-    }else{
-      var nb1l=mkBtn('btn-main','🔁 重玩',function(){startGame(50);});
-      row.appendChild(nb1l);
-    }
+  if(!win){
+    // ===== 失败面板 =====
+    var remain=(BounceTower.LEVELS[(levelId||curLv)-1]||{}).target-score;
+    p.innerHTML='<div class="panel-fail">'+
+      '<div class="pf-emoji">😢</div>'+
+      '<div class="pf-title">差一点就过了</div>'+
+      '<div class="pf-big">'+score+'</div>'+
+      '<div class="pf-label">层</div>'+
+      '<div class="pf-close">'+(remain>0&&remain<=15?'只差 <strong>'+remain+'</strong> 层！':(remain>0?'还差 '+remain+' 层':'继续加油'))+'</div>'+
+      '<div class="pf-actions">'+
+        '<button class="pf-btn-main" id="pRetry">🔄 再试一次</button>'+
+        '<button class="pf-btn-share" id="pShareFail">📤 分享得道具</button>'+
+        '<button class="pf-btn-sub" id="pHomeFail">🏠 返回首页</button>'+
+      '</div></div>';
+    el('pRetry').addEventListener('click',function(){au();startGame(levelId||curLv);});
+    el('pShareFail').addEventListener('click',function(){au();shareScore(score,cb,levelId);});
+    el('pHomeFail').addEventListener('click',goHome);
+    show('panel');
   }else{
-    var nb1f=mkBtn('btn-main','🔄 再试一次',function(){startGame(levelId||curLv);});
-    row.appendChild(nb1f);
+    // ===== 通关面板 =====
+    var nextLv=levelId+1;
+    var pct=levelId<=3?95:levelId<=6?60:levelId<=10?35:levelId<=15?18:levelId<=20?8:levelId<=25?3:levelId<=30?1:levelId<=40?0.3:0.05;
+    var progWidth=Math.min(100,(score/((BounceTower.LEVELS[levelId-1]||{}).target||1))*100);
+    p.innerHTML='<div class="panel-win">'+
+      '<div class="pw-emoji">🎉</div>'+
+      '<div class="pw-title">'+'通关！'+(wasNewBest?' 新纪录！':'')+'</div>'+
+      '<div class="pw-stars">'+'⭐'.repeat(stars)+'☆'.repeat(Math.max(0,3-stars))+'</div>'+
+      '<div class="pw-detail">'+score+' 层 · 最高 '+cb+' 连击</div>'+
+      '<div class="pw-progress"><div class="pw-progress-fill" style="width:'+progWidth+'%"></div></div>'+
+      '<div class="pw-labels"><span>🏅 超过 '+pct+'% 玩家</span><span>'+(stars>=3?'🌟 完美':'⭐ 目标 '+((BounceTower.LEVELS[levelId-1]||{}).target)+' 层')+'</span></div>'+
+      '<div class="pw-actions">'+
+        ((levelId||curLv)>=50?'':'<button class="pw-btn-next" id="pNext">▶ 下一关</button>')+
+        '<button class="pw-btn-share" id="pShareWin">📤 分享炫耀</button>'+
+      '</div>'+
+      ((levelId||curLv)>=50?'':'<div class="pw-retry" id="pRetryWin">🔁 重玩本关</div>')+
+      '<div class="pw-retry" id="pHomeWin">🏠 返回首页</div></div>';
+    if((levelId||curLv)<50){
+      el('pNext').addEventListener('click',function(){au();startGame(nextLv);});
+      el('pRetryWin').addEventListener('click',function(){au();startGame(levelId||curLv);});
+    }
+    el('pShareWin').addEventListener('click',function(){au();shareScore(score,cb,levelId);});
+    el('pHomeWin').addEventListener('click',goHome);
+    show('panel');
   }
-  // 分享按钮
-  var shareRow=el('pbtnRow').parentNode.querySelector('.share-row');
-  if(!shareRow){shareRow=document.createElement('div');shareRow.className='btn-row share-row';shareRow.style.marginTop='6px';el('pbtnRow').parentNode.insertBefore(shareRow,el('pbtnHome'));}
-  shareRow.innerHTML='';
-  var shareBtn=document.createElement('button');shareBtn.className='btn-ghost';shareBtn.textContent='📤 分享成绩';shareBtn.style.color='#888';
-  shareBtn.addEventListener('click',function(){au();shareScore(score,cb,levelId);});
-  shareRow.appendChild(shareBtn);
-
-  el('pbtnHome').onclick=function(){goHome();};
 }
-function mkBtn(cls,txt,fn){var b=document.createElement('button');b.className=cls;b.textContent=txt;b.addEventListener('click',function(){au();fn();});return b;}
 
 // ===== 工具计数更新 =====
 function updateTools(){
   var sc=game.getToolCount('slow'),wc=game.getToolCount('widen'),rc=game.getToolCount('reverse');
-  el('btnSlow').disabled=sc<=0;
-  el('btnWiden').disabled=wc<=0;
-  el('btnReverse').disabled=rc<=0;
-  el('cntSlow').textContent=sc>0?'×'+sc:'';
-  el('cntWiden').textContent=wc>0?'×'+wc:'';
-  el('cntReverse').textContent=rc>0?'×'+rc:'';
+  el('btnSlow').disabled=sc<=0;el('cntSlow').textContent=sc;
+  el('btnWiden').disabled=wc<=0;el('cntWiden').textContent=wc;
+  el('btnReverse').disabled=rc<=0;el('cntReverse').textContent=rc;
+  // 工具用完时闪烁提示
+  if(sc<=0&&wc<=0&&rc<=0)showToast('💡 道具用完了，分享给好友获取道具！');
 }
 
 // ===== 成就 Toast =====
