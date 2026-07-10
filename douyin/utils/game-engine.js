@@ -9,8 +9,8 @@
 'use strict';
 
 var LEVELS = [
-  {id:1, name:'你好世界',   target:8,   speedMul:0.5, widthPct:0.85, desc:'慢速简单，熟悉操作'},
-  {id:2, name:'地狱之门',   target:12,  speedMul:1.0, widthPct:0.68, desc:'依然简单，适应移动'},
+  {id:1, name:'你好世界',   target:5,   speedMul:0.3, widthPct:0.90, desc:'闭着眼都能过'},
+  {id:2, name:'地狱之门',   target:15,  speedMul:2.4, widthPct:0.45, desc:'90%的人死在这'},
   {id:3, name:'喘口气',     target:10,  speedMul:0.7, widthPct:0.74, desc:'缓一缓'},
   {id:4, name:'升温',       target:16,  speedMul:1.1, widthPct:0.58, desc:'手开始冒汗'},
   {id:5, name:'节奏来了',   target:13,  speedMul:0.8, widthPct:0.66, desc:'⭐ 找到感觉了'},
@@ -124,7 +124,7 @@ function create(platform){
   function SPB(){return W*0.014;}
   function SPI(){return W*0.000026;}
 
-  var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0;
+  var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0,levelShiftX=0;
   var camY=0,tCamY=0,pts=[],fps=[],dp=0,dtY=0,cpt=0,cpText='',cpColor='#fff';
   var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0;
   var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,levelWidthPct=0,starsEarned=0,curLvData=LEVELS[0],dailyMutatorId='';
@@ -245,14 +245,14 @@ function create(platform){
 
   // ====== 核心机制：堆叠区固定顶部，移动方块从底部上冲 ======
   function topOfStack(){
-    if(stack.length===0) return {x:W/2-IBW()/2, y:STACK_ANCHOR, w:IBW()};
+    if(stack.length===0) return {x:W/2-IBW()/2+levelShiftX, y:STACK_ANCHOR, w:IBW()};
     var t=stack[stack.length-1];
     return {x:t.x, y:t.y+BH(), w:t.w};
   }
 
   function swBounds(bw){
     var t=topOfStack(),hs=t.w/2,hb=bw/2,cx=t.x+hs;
-    var extraMul=levelId<=2?1.0:2.5;  // 第1-2关缩小滑行范围，降低难度
+    var extraMul=levelId===1?0.5:2.5;  // 第1关缩小范围，第2关起正常
     var extra=t.w*extraMul;
     return {min:cx-hs-hb-extra, max:cx+hs+hb+extra, cx:cx};
   }
@@ -263,7 +263,8 @@ function create(platform){
     if(levelId>=31){var accel=Math.min(1+Math.floor(score/5)*0.03,1.1);spd*=accel;}
     var x=fromR?b.max:b.min;
     x=Math.max(10,Math.min(x,W-w-10));  // 确保方块完整可见
-    cur={x:x, y:BLOCK_SPAWN_Y, w:w, color:nc(), dir:fromR?-1:1, speed:spd, baseSpeed:spd, spawnAnim:1.0, spawnTime:Date.now()};
+    var initDir=fromR?-1:1;if(dailyMutatorId==='reverse')initDir*=-1;
+    cur={x:x, y:BLOCK_SPAWN_Y, w:w, color:nc(), dir:initDir, speed:spd, baseSpeed:spd, spawnAnim:1.0, spawnTime:Date.now()};
     dp=0;status='playing';
   }
 
@@ -312,6 +313,8 @@ function create(platform){
     }
     cur=null;dp=0;
 
+    // 第20关特殊规则：每5块平台随机漂移
+    if(levelId===20&&score>2&&score%5===0)levelShiftX+=Math.floor(Math.random()>0.5?8:-8);
     // 里程碑：每10层庆祝
     if(score%10===0&&score<levelTarget){
       spawnPts(W/2,H*0.4,8,'#ffd700',1.5);
@@ -399,9 +402,10 @@ function create(platform){
   function getShareRefillsLeft(){return 3-(stats.shareRefills||0);}
 
   function setMode(m,opts){
-    opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;levelWidthPct=opts.widthPct||0;dailyMutatorId=opts.mutatorId||'';
+    opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;levelWidthPct=opts.widthPct||0;
     curLvData=LEVELS[levelId-1]||LEVELS[0];
     bgDirty=true;flashA=0.4;flashC='#ffffff';reset();
+    dailyMutatorId=opts.mutatorId||'';  // 必须在reset之后赋值
     try{render();}catch(e){}
   }
   function reset(){
@@ -409,7 +413,7 @@ function create(platform){
     pi=Math.floor(Math.random()*pals.length);ci=0;
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
     camY=0;tCamY=0;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
-    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;checkpointScore=0;dailyMutatorId='';
+    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;checkpointScore=0;dailyMutatorId='';levelShiftX=0;
     paused=false;bgmWasPlaying=false;
     status='idle';
   }
@@ -426,6 +430,10 @@ function create(platform){
     {id:'narrow',name:'刀锋之上',desc:'宽度-15%',apply:function(s){s.widthPct*=0.85;}},
     {id:'no_combo',name:'孤军奋战',desc:'连击奖励关闭',apply:function(s){s.noCombo=1;}},
     {id:'endless',name:'无限挑战',desc:'目标翻倍',apply:function(s){s.target*=2;}},
+    {id:'reverse',name:'反向模式',desc:'方向相反',apply:function(s){s.reverseInit=1;}},
+    {id:'no_tools',name:'赤手空拳',desc:'无初始道具',apply:function(s){s.noTools=1;}},
+    {id:'double_speed',name:'双倍速',desc:'速度翻倍不易把握',apply:function(s){s.speedMul*=2.0;}},
+    {id:'half_width',name:'一线天',desc:'方块更窄',apply:function(s){s.widthPct*=0.7;}},
   ];
   function getDailyChallenge(){
     var today=new Date().toISOString().slice(0,10),h=hash(today);
@@ -469,19 +477,26 @@ function create(platform){
     a=a===undefined?1:a;rot=rot||0;scaleY=scaleY||1;
     ctx.save();ctx.translate(x+w/2,y+h/2);
     if(rot!==0)ctx.rotate(rot);
-    if(scaleY!==1)ctx.scale(1,scaleY);
     ctx.globalAlpha=a;
-    if(rot!==0||scaleY!==1){
-      rrect(-w/2,-h/2,w,h,3,c);
-    }else{
-      ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
-      var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
-      g.addColorStop(0,shade(c,20));g.addColorStop(0.3,c);g.addColorStop(1,shade(c,-40));
-      rrect(-w/2,-h/2,w,h,6,g);
-      ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-      ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(-w/2+4,-h/2+2,w-8,h*0.18);
-      ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(-w/2,-h/2+h-3,w,3);
-    }
+    // 投影
+    ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
+    // 3D砖块：主面 + 顶边高光 + 底边暗影 + 侧边深度
+    // 主面 - 渐变
+    var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
+    g.addColorStop(0,shade(c,25));
+    g.addColorStop(0.15,c);
+    g.addColorStop(0.85,shade(c,-15));
+    g.addColorStop(1,shade(c,-35));
+    rrect(-w/2,-h/2,w,h,4,g);
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    // 顶边高光线
+    ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(-w/2+5,-h/2+2,w-10,Math.min(5,h*0.12));
+    // 底边暗影线
+    ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(-w/2,-h/2+h-4,w,3);
+    // 侧边深度（左右各一条暗线）
+    ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(-w/2,-h/2+4,2,h-8);
+    ctx.fillRect(w/2-2,-h/2+4,2,h-8);
+    if(scaleY!==1)ctx.scale(1,scaleY);  // 弹性动画在投影后应用，不拉伸阴影
     ctx.restore();
   }
   function dText(t,x,y,s,c,a,sc,sb){a=a||'center';sb=sb||0;ctx.font='900 '+s+'px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign=a;ctx.textBaseline='middle';if(sb>0&&sc){ctx.shadowColor=sc;ctx.shadowBlur=sb;}ctx.fillStyle=c;ctx.fillText(t,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;}
@@ -543,6 +558,9 @@ function create(platform){
         ctx.globalAlpha=0.04;dBlock(cur.x-cur.dir*cur.baseSpeed*9,cur.y-cam,cur.w,BH(),cur.color,0.04);
         ctx.globalAlpha=0.07;dBlock(cur.x-cur.dir*cur.baseSpeed*5,cur.y-cam,cur.w,BH(),cur.color,0.07);
         ctx.globalAlpha=1;
+        ctx.save();ctx.translate(cur.x,cur.y-cam);
+        ctx.strokeStyle='rgba(255,255,255,'+(0.12+Math.sin(Date.now()/250)*0.08)+')';ctx.lineWidth=2;
+        ctx.strokeRect(-cur.w/2-1,-BH()/2-1,cur.w+2,BH()+2);ctx.restore();
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color,1,0,blockScaleY);
       }else{
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color);
