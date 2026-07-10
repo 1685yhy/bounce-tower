@@ -1,16 +1,15 @@
 /**
  * ============================================================
- *  弹弹塔 Bounce Tower — 共享游戏引擎 v6.0
+ *  弹弹塔 Bounce Tower — 共享游戏引擎 v7.0
+ *  下方滑块向上冲·堆叠在顶部固定区域·始终保持固定间距
  *  奇数关缓冲·偶数关断崖·每5关难度峰值·31关起关内变速
- *  闯关(50关) + 每日挑战
  * ============================================================
  */
 (function(global){
 'use strict';
 
-// ========== 50关 — 羊了个羊式心理曲线 ==========
 var LEVELS = [
-  {id:1, name:'你好世界',   target:8,   speedMul:0.6, widthPct:0.80, desc:'闭着眼都能过'},
+  {id:1, name:'你好世界',   target:8,   speedMul:0.35, widthPct:0.85, desc:'慢速简单，找找感觉'},
   {id:2, name:'地狱之门',   target:12,  speedMul:1.6, widthPct:0.68, desc:'第2关·大多数人死在这'},
   {id:3, name:'喘口气',     target:10,  speedMul:0.9, widthPct:0.74, desc:'缓一缓'},
   {id:4, name:'升温',       target:16,  speedMul:1.9, widthPct:0.58, desc:'手开始冒汗'},
@@ -40,7 +39,7 @@ var LEVELS = [
   {id:28,name:'登天之路',   target:72,  speedMul:3.3, widthPct:0.28, desc:'传奇诞生中'},
   {id:29,name:'最后之门',   target:50,  speedMul:2.2, widthPct:0.36, desc:'没有人相信'},
   {id:30,name:'弹弹神话',   target:80,  speedMul:3.4, widthPct:0.26, desc:'👑 前0.5%'},
-  {id:31,name:'封神之路',   target:55,  speedMul:2.3, widthPct:0.34, desc:'变速开始，捉摸不定'},
+  {id:31,name:'封神之路',   target:55,  speedMul:2.3, widthPct:0.34, desc:'变速开始'},
   {id:32,name:'疾风骤雨',   target:85,  speedMul:3.5, widthPct:0.24, desc:'0.3%通关率'},
   {id:33,name:'大师修炼',   target:60,  speedMul:2.4, widthPct:0.32, desc:'节奏变了'},
   {id:34,name:'百层挑战',   target:90,  speedMul:3.6, widthPct:0.22, desc:'0.2%通关率'},
@@ -112,15 +111,15 @@ function create(platform){
   var getTheme=platform.getTheme||function(){return'default';};
   var useNativeUI=platform.useNativeUI||false;
   var vibrate=platform.vibrate||function(){};
-  var safeTop=platform.safeTop||44;  // 从外部传入真实安全区高度
+  var safeTop=platform.safeTop||44;
+
+  // ====== 新布局常量 ======
+  var STACK_ANCHOR = Math.max(safeTop + 50, 70);    // 堆叠区固定锚点（屏幕顶部附近）
+  var BLOCK_SPAWN_Y = H - 80;                       // 移动方块固定生成位置（屏幕底部）
+  var stackOffset = 0;                               // 堆叠逐块上移偏移量
 
   function BH(){return Math.max(22,W*0.075);}
-  function IBW(){
-    var base=Math.min(W*0.5,200);
-    var lv=LEVELS[levelId-1];
-    var pct=lv?lv.widthPct:0.8;
-    return Math.max(55,Math.round(base*pct));
-  }
+  function IBW(){var base=Math.min(W*0.5,200);var lv=LEVELS[levelId-1];var pct=lv?lv.widthPct:0.8;return Math.max(55,Math.round(base*pct));}
   function PERF(){return Math.max(4,Math.round(IBW()*0.06));}
   function SPB(){return W*0.014;}
   function SPI(){return W*0.000026;}
@@ -131,22 +130,21 @@ function create(platform){
   var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,starsEarned=0,curLvData=LEVELS[0];
   var themeId='default',pals=THEMES.default.pals,bgColors=THEMES.default.bg,pi=0,ci=0;
   var slowMotionTimer=0,slowMotionActive=false;
-  // 落地反弹动画：记录最近落块的 scaleY 压缩动画
-  var landAnim=0; // >0时最新方块有压扁动画，0=正常
+  var landAnim=0;
 
-  // 离屏背景 canvas（性能优化：背景只在尺寸/主题变化时重绘）
-  var bgCanvas=null,bgCtx=null,bgDirty=true;
+  // 离屏背景
+  var bgCanvas=null,bgDirty=true;
   function ensureBgCanvas(){
-    if(!bgCanvas){bgCanvas=document.createElement('canvas');}
+    if(!bgCanvas)bgCanvas=document.createElement('canvas');
     if(bgCanvas.width!==W||bgCanvas.height!==H){bgCanvas.width=W;bgCanvas.height=H;bgDirty=true;}
     if(bgDirty){
       bgDirty=false;
-      bgCtx=bgCanvas.getContext('2d');
-      var bg=bgCtx.createLinearGradient(0,0,0,H);bg.addColorStop(0,bgColors[0]);bg.addColorStop(0.5,bgColors[1]);bg.addColorStop(1,bgColors[2]);
-      bgCtx.fillStyle=bg;bgCtx.fillRect(0,0,W,H);
-      bgCtx.strokeStyle='rgba(0,0,0,0.03)';bgCtx.lineWidth=0.5;
-      for(var x=40;x<W;x+=40){bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,H);bgCtx.stroke();}
-      for(var y=40;y<H;y+=40){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(W,y);bgCtx.stroke();}
+      var bCtx=bgCanvas.getContext('2d');
+      var bg=bCtx.createLinearGradient(0,0,0,H);bg.addColorStop(0,bgColors[0]);bg.addColorStop(0.5,bgColors[1]);bg.addColorStop(1,bgColors[2]);
+      bCtx.fillStyle=bg;bCtx.fillRect(0,0,W,H);
+      bCtx.strokeStyle='rgba(0,0,0,0.03)';bCtx.lineWidth=0.5;
+      for(var x=40;x<W;x+=40){bCtx.beginPath();bCtx.moveTo(x,0);bCtx.lineTo(x,H);bCtx.stroke();}
+      for(var y=40;y<H;y+=40){bCtx.beginPath();bCtx.moveTo(0,y);bCtx.lineTo(W,y);bCtx.stroke();}
     }
   }
 
@@ -159,10 +157,10 @@ function create(platform){
   function sfxAchieve(){playBeep(660,0.08,'sine',0.06);setTimeout(function(){playBeep(880,0.08,'sine',0.06);},80);setTimeout(function(){playBeep(1100,0.12,'sine',0.06);},160);}
   function sfxStar(){playBeep(523,0.08,'sine',0.06);setTimeout(function(){playBeep(659,0.08,'sine',0.06);},100);setTimeout(function(){playBeep(784,0.12,'sine',0.06);},200);}
   function sfxTool(){playBeep(440,0.06,'sine',0.05);setTimeout(function(){playBeep(660,0.06,'sine',0.05);},70);setTimeout(function(){playBeep(880,0.08,'sine',0.05);},140);}
-  function sfxMiss(){playBeep(150,0.25,'sawtooth',0.08);}  // 降低刺耳感
+  function sfxMiss(){playBeep(150,0.25,'sawtooth',0.08);}
 
-  // BGM：用 Web Audio 绝对时间调度，消除 setTimeout 漂移
-  var bgmPlaying=false,bgmScheduledUntil=0,bgmNoteIdx=0;
+  // BGM
+  var bgmPlaying=false,bgmTimer=null,bgmNoteIdx=0;
   var BGM_NOTES=[
     {f:523,d:0.18},{f:659,d:0.18},{f:784,d:0.18},{f:1047,d:0.25},
     {f:0,d:0.08},{f:784,d:0.15},{f:659,d:0.15},{f:523,d:0.2},
@@ -172,11 +170,8 @@ function create(platform){
     {f:1047,d:0.3},{f:0,d:0.1},{f:988,d:0.12},{f:880,d:0.12},
     {f:784,d:0.2},{f:659,d:0.15},{f:523,d:0.25},{f:0,d:0.35},
   ];
-  var BGM_VOL=0.03,bgmTimer=null;
-
-  function bgmStart(){
-    if(bgmPlaying)return;bgmPlaying=true;bgmNoteIdx=0;bgmScheduleNext();
-  }
+  var BGM_VOL=0.03;
+  function bgmStart(){if(bgmPlaying)return;bgmPlaying=true;bgmNoteIdx=0;bgmScheduleNext();}
   function bgmStop(){bgmPlaying=false;if(bgmTimer)clearTimeout(bgmTimer);bgmTimer=null;}
   function bgmToggle(){if(bgmPlaying)bgmStop();else bgmStart();return bgmPlaying;}
   function bgmScheduleNext(){
@@ -247,20 +242,29 @@ function create(platform){
   function getLevelProgress(){var max=0;for(var key in stats.levelStars){if(stats.levelStars[key]>=1){var lv=parseInt(key,10);if(lv>max)max=lv;}}return max;}
   function getTotalStars(){var t=0;for(var key in stats.levelStars)t+=stats.levelStars[key];return t;}
 
-  function topOfStack(){if(stack.length===0)return{x:W/2-IBW()/2,y:H*0.65,w:IBW()};var t=stack[stack.length-1];return{x:t.x,y:t.y+BH(),w:t.w};}
-  function swBounds(bw){var t=topOfStack(),hs=t.w/2,hb=bw/2,cx=t.x+hs;
-  var extraMul=levelId===1?0.05:2.5;
-  var extra=t.w*extraMul;
-  return{min:cx-hs-hb-extra,max:cx+hs+hb+extra,cx:cx};}
+  // ====== 核心机制：堆叠区固定顶部，移动方块从底部上冲 ======
+  function topOfStack(){
+    if(stack.length===0) return {x:W/2-IBW()/2, y:STACK_ANCHOR, w:IBW()};
+    var t=stack[stack.length-1];
+    return {x:t.x, y:t.y+BH(), w:t.w};
+  }
 
-  function HOVER(){return BH()*1.4;}
+  function swBounds(bw){
+    var t=topOfStack(),hs=t.w/2,hb=bw/2,cx=t.x+hs;
+    var extraMul=levelId===1?0.05:2.5;
+    var extra=t.w*extraMul;
+    return {min:cx-hs-hb-extra, max:cx+hs+hb+extra, cx:cx};
+  }
+
   function spawnBlock(){
     var t=topOfStack(),w=t.w,b=swBounds(w),fromR=stack.length%2===0;
     var spd=(SPB()+score*SPI())*levelSpeedMul;
     if(levelId>=31){var accel=Math.min(1+Math.floor(score/5)*0.05,1.6);spd*=accel;}
-    cur={x:fromR?b.max:b.min,y:t.y-HOVER(),w:w,color:nc(),dir:fromR?-1:1,speed:spd,baseSpeed:spd,spawnAnim:1.0};
+    // 移动方块始终在底部固定位置
+    cur={x:fromR?b.max:b.min, y:BLOCK_SPAWN_Y, w:w, color:nc(), dir:fromR?-1:1, speed:spd, baseSpeed:spd, spawnAnim:1.0};
     dp=0;status='playing';
   }
+
   function dropBlock(){if(status!=='playing'||!cur)return;dp=0;dtY=topOfStack().y;status='dropping';}
 
   function placeBlock(){
@@ -269,30 +273,32 @@ function create(platform){
     var isPerf=Math.abs(b.x-t.x)<=PERF();
     var cutLoss=isPerf?0:Math.abs(b.x-t.x)*0.3;
     var finalW=Math.max(30,oW-cutLoss);
-    var pb={x:oL+(oW-finalW)/2,y:t.y,w:finalW,color:b.color};
-    if(bL<sL)fps.push({x:bL,y:t.y,w:sL-bL,h:BH(),color:b.color,vy:-1,vx:-2-Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
-    if(bR>sR)fps.push({x:sR,y:t.y,w:bR-sR,h:BH(),color:b.color,vy:-1,vx:2+Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
-    // 飞块上限保护
+    var pb={x:oL+(oW-finalW)/2, y:t.y, w:finalW, color:b.color};
+    if(bL<sL)fps.push({x:bL, y:t.y, w:sL-bL, h:BH(), color:b.color, vy:-1, vx:-2-Math.random()*3, rot:0, rs:(Math.random()-0.5)*0.2});
+    if(bR>sR)fps.push({x:sR, y:t.y, w:bR-sR, h:BH(), color:b.color, vy:-1, vx:2+Math.random()*3, rot:0, rs:(Math.random()-0.5)*0.2});
     if(fps.length>30)fps.splice(0,fps.length-30);
     stack.push(pb);score++;wasNewBest=false;
-    landAnim=8;  // 触发落地弹性动画
     if(score>bestScore){bestScore=score;wasNewBest=true;saveBest(bestScore);onNewBest(score);}
     stats.totalLayers++;flushStats();
+    landAnim=8;
+
+    // 堆叠偏移：每放一块堆叠整体上移一个块高，保持视觉效果固定
+    stackOffset+=BH();
+    var syoff=t.y-stackOffset+BH()/2;  // 更新的粒子偏移参考
 
     if(isPerf){
       combo++;if(combo>maxCombo)maxCombo=combo;perfCount++;stats.totalPerfects++;flushStats();
-      // 连击宽度奖励，同时防右边界溢出
       if(combo>=3){
         var bonus=Math.min(combo*1.5,20);
         pb.w=Math.min(pb.w+bonus,IBW()*1.1);
         pb.x=Math.max(1,pb.x-(pb.w-oW)/2);
-        if(pb.x+pb.w>W-1)pb.x=W-1-pb.w;  // 防右溢出
+        if(pb.x+pb.w>W-1)pb.x=W-1-pb.w;
       }
-      spawnPts(oL+oW/2,t.y+BH()/2,18,b.color,1.2);flashA=0.25;flashC='#ffd700';
-      if(combo>=5)spawnPts(oL+oW/2,t.y+BH()/2,10,'#ffffff',1.5);
+      spawnPts(oL+oW/2,syoff,18,b.color,1.2);flashA=0.25;flashC='#ffd700';
+      if(combo>=5)spawnPts(oL+oW/2,syoff,10,'#ffffff',1.5);
       if(combo>=3){var msgs=combo>=20?['👑 神之手!','🌟 无敌!','💎 传说!']:combo>=10?['🔥 炸裂!','⚡ 疯狂!','🎯 精准!']:combo>=5?['✨ 连击!','💪 厉害!','👏 漂亮!']:['👍 不错!','✅ 完美!','💯 满分!'];cpText=msgs[Math.floor(Math.random()*msgs.length)]+' x'+combo;cpColor=b.color;cpt=55;vibrate('light');sfxCombo();vibrate('heavy');}else{sfxPerfect();if(combo===0)vibrate('light');}
-    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,t.y+BH()/2,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);vibrate('medium');}}}
-    tCamY=Math.max(0,t.y-H*0.35);cur=null;dp=0;
+    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,syoff,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);vibrate('medium');}}}
+    cur=null;dp=0;
 
     if(score>=levelTarget){
       var stars=1;if(score>=levelTarget*1.5)stars=3;else if(score>=levelTarget*1.2)stars=2;
@@ -323,7 +329,7 @@ function create(platform){
         pts.push({x:cur.x+cur.w/2,y:cur.y+BH()/2,vx:Math.cos(da)*ds,vy:Math.sin(da)*ds-5,life:1,decay:0.015+Math.random()*0.03,size:3+Math.random()*5,color:cur.color});}
       cur=null;}
     shake=20;flashA=0.7;flashC=levelId<=2?'#ff4444':levelId<=10?'#ff6b6b':levelId<=20?'#ff3366':levelId<=35?'#cc0033':'#8800cc';
-    for(var di2=0;di2<stack.length;di2++){var b2=stack[di2];if(Math.random()<0.3)spawnPts(b2.x+b2.w/2,b2.y+BH()/2,3,b2.color,0.5);}
+    for(var di2=0;di2<stack.length;di2++){var b2=stack[di2];if(Math.random()<0.3)spawnPts(b2.x+b2.w/2,b2.y-stackOffset+BH()/2,3,b2.color,0.5);}
     slowMotionActive=false;slowMotionTimer=0;
     stats.totalGames++;if(maxCombo>stats.bestComboEver)stats.bestComboEver=maxCombo;
     if(mode==='level'){stats.levelAttempts[levelId]=(stats.levelAttempts[levelId]||0)+1;}
@@ -342,20 +348,20 @@ function create(platform){
       if(stats.tools.slow<=0)return false;
       stats.tools.slow--;flushStats();persistStats();
       slowMotionActive=true;slowMotionTimer=300;
-      cpText='🐢 慢动作！';cpColor='#64c8ff';cpt=50;  // 视觉反馈
+      cpText='🐢 慢动作！';cpColor='#64c8ff';cpt=50;
       sfxTool();onUseTool('slow',stats.tools.slow);return true;
     }else if(toolName==='widen'){
       if(stats.tools.widen<=0)return false;
       stats.tools.widen--;flushStats();persistStats();
       if(stack.length>0){var top=stack[stack.length-1];top.w=IBW();top.x=Math.max(2,W/2-IBW()/2);}
-      cpText='📏 加宽！';cpColor='#ffd700';cpt=50;  // 视觉反馈
+      cpText='📏 加宽！';cpColor='#ffd700';cpt=50;
       sfxTool();spawnPts(W/2,H*0.6,20,'#ffd700',1.5);flashA=0.3;flashC='#ffd700';
       onUseTool('widen',stats.tools.widen);return true;
     }else if(toolName==='reverse'){
       if(stats.tools.reverse<=0)return false;
       stats.tools.reverse--;flushStats();persistStats();
       cur.dir*=-1;
-      cpText='🔄 反向！';cpColor='#a78bfa';cpt=50;  // 视觉反馈
+      cpText='🔄 反向！';cpColor='#a78bfa';cpt=50;
       sfxTool();spawnPts(cur.x+cur.w/2,cur.y,8,'#64c8ff',1);
       onUseTool('reverse',stats.tools.reverse);return true;
     }
@@ -363,26 +369,21 @@ function create(platform){
   }
   function addTool(toolName,amount){stats.tools[toolName]=(stats.tools[toolName]||0)+amount;flushStats();persistStats();}
   function getToolCount(toolName){return stats.tools[toolName]||0;}
-  function shareRefill(){
-    if(stats.shareRefills>=3)return false;
-    stats.shareRefills++;stats.tools.slow++;stats.tools.widen++;stats.tools.reverse++;
-    flushStats();persistStats();return true;
-  }
+  function shareRefill(){if(stats.shareRefills>=3)return false;stats.shareRefills++;stats.tools.slow++;stats.tools.widen++;stats.tools.reverse++;flushStats();persistStats();return true;}
   function getShareRefillsLeft(){return 3-(stats.shareRefills||0);}
 
   function setMode(m,opts){
     opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;
     curLvData=LEVELS[levelId-1]||LEVELS[0];
-    bgDirty=true;  // 主题/切关时重建背景缓存
-    flashA=0.4;flashC='#ffffff';reset();
+    bgDirty=true;flashA=0.4;flashC='#ffffff';reset();
     try{render();}catch(e){}
   }
   function reset(){
     persistStats();themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;bgDirty=true;
     pi=Math.floor(Math.random()*pals.length);ci=0;
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
-    camY=0;tCamY=-H*0.1;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
-    slowMotionActive=false;slowMotionTimer=0;landAnim=0;
+    camY=0;tCamY=0;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
+    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;
     status='idle';
   }
   function refreshTheme(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;bgDirty=true;}
@@ -395,7 +396,6 @@ function create(platform){
 
   function update(){
     if(destroyed)return;
-    // deltaTime驱动的相机插值
     var now=Date.now(),delta=Math.min(now-lastFrameTime,50);lastFrameTime=now;
     var lerpT=1-Math.pow(0.92,delta/16);
     camY=lerp(camY,tCamY,lerpT);
@@ -405,17 +405,17 @@ function create(platform){
     if(landAnim>0)landAnim--;
     if(slowMotionActive){slowMotionTimer--;if(slowMotionTimer<=0){slowMotionActive=false;}}
     if(status==='playing'&&cur){
-      // spawnAnim：入场从天而降（scaleY压扁到1.0的过渡，用于render）
       if(cur.spawnAnim>0)cur.spawnAnim=Math.max(0,cur.spawnAnim-0.15);
       var b=cur,bd=swBounds(b.w);
       var effectiveSpeed=slowMotionActive?b.baseSpeed*0.3:b.baseSpeed;
       b.x+=effectiveSpeed*b.dir;
       if(b.x<=bd.min){b.x=bd.min;b.dir=1;}else if(b.x+b.w>=bd.max){b.x=bd.max-b.w;b.dir=-1;}
     }
+    // 从底部向堆叠区上冲
     if(status==='dropping'&&cur){
       dp+=delta/16*0.13;
       if(dp>=1){dp=1;cur.y=dtY;placeBlock();if(status!=='gameover'&&status!=='levelcomplete')spawnBlock();}
-      else{var sy=topOfStack().y-HOVER();cur.y=sy+(dtY-sy)*eOutBounce(dp);}
+      else{cur.y=BLOCK_SPAWN_Y+(dtY-BLOCK_SPAWN_Y)*eOutBounce(dp);}
     }
     for(var i=pts.length-1;i>=0;i--){var p=pts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=p.decay;if(p.life<=0)pts.splice(i,1);}
     for(var j=fps.length-1;j>=0;j--){var f=fps[j];f.vy+=0.65;f.y+=f.vy;f.x+=f.vx;f.rot+=f.rs;if(f.y>H+250)fps.splice(j,1);}
@@ -424,24 +424,20 @@ function create(platform){
   function rrect(x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();ctx.fill();}
   function dBlock(x,y,w,h,c,a,rot,scaleY){
     a=a===undefined?1:a;rot=rot||0;scaleY=scaleY||1;
-    ctx.save();
-    ctx.translate(x+w/2,y+h/2);
+    ctx.save();ctx.translate(x+w/2,y+h/2);
     if(rot!==0)ctx.rotate(rot);
     if(scaleY!==1)ctx.scale(1,scaleY);
     ctx.globalAlpha=a;
     if(rot!==0||scaleY!==1){
       rrect(-w/2,-h/2,w,h,3,c);
     }else{
-      // 方块投影
       ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
       var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
       g.addColorStop(0,shade(c,20));g.addColorStop(0.3,c);g.addColorStop(1,shade(c,-40));
       rrect(-w/2,-h/2,w,h,6,g);
       ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-      ctx.fillStyle='rgba(255,255,255,0.3)';
-      ctx.fillRect(-w/2+4,-h/2+2,w-8,h*0.18);
-      ctx.fillStyle='rgba(0,0,0,0.1)';
-      ctx.fillRect(-w/2,-h/2+h-3,w,3);
+      ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(-w/2+4,-h/2+2,w-8,h*0.18);
+      ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(-w/2,-h/2+h-3,w,3);
     }
     ctx.restore();
   }
@@ -451,13 +447,12 @@ function create(platform){
     ctx.clearRect(0,0,W,H);
     var sx=shake?(Math.random()-0.5)*shake*2:0,sy=shake?(Math.random()-0.5)*shake*2:0;
     ctx.save();ctx.translate(sx,sy);
-    // 离屏背景一次绘制
     ensureBgCanvas();ctx.drawImage(bgCanvas,0,0);
     var cam=camY;
 
-    // 初始平台（未开始堆叠）
+    // 初始平台
     if(stack.length===0){
-      var t0=topOfStack(),by=t0.y-cam;
+      var t0=topOfStack(),by=t0.y-cam-stackOffset;
       if(by>-BH()&&by<H+BH()){
         dBlock(t0.x,by,t0.w,BH(),'#d5cdbc',0.85);
         if(status==='idle'){
@@ -468,38 +463,36 @@ function create(platform){
       }
     }
 
-    // 堆叠方块（最新一块有落地弹性动画）
+    // 堆叠方块（应用stackOffset使其视觉位置固定）
     for(var i=0;i<stack.length;i++){
-      var b=stack[i],dy=b.y-cam;
-      if(dy>H+BH()||dy<-BH()*2)continue;
+      var b=stack[i],dy=b.y-cam-stackOffset;
+      if(dy>H+BH()||dy<-BH()*5)continue;
       var landSY=1;
       if(i===stack.length-1&&landAnim>0){
-        // 压扁0.88 → 弹回1.0 → 轻微拉伸1.04 → 回1.0
         var lp=landAnim/8;
         landSY=lp>0.5?lerp(1.0,0.88,(lp-0.5)*2):lerp(1.04,1.0,lp*1.5);
       }
       dBlock(b.x,dy,b.w,BH(),b.color,1,0,landSY);
     }
 
-    // 落点光晕
+    // 落点预览
     if(cur&&status==='playing'){
-      var t=topOfStack(),zy=t.y-cam;
+      var t=topOfStack(),zy=t.y-cam-stackOffset;
       var overlap=Math.max(0,Math.min(cur.x+cur.w,t.x+t.w)-Math.max(cur.x,t.x));
-      var pct=overlap/Math.max(cur.w,t.w);
-      var glowC=pct>0.7?'rgba(74,222,128,0.3)':pct>0.3?'rgba(255,180,0,0.2)':'rgba(255,100,100,0.15)';
+      var oPct=overlap/Math.max(cur.w,t.w);
+      var glowC=oPct>0.7?'rgba(74,222,128,0.3)':oPct>0.3?'rgba(255,180,0,0.2)':'rgba(255,100,100,0.15)';
       ctx.fillStyle=glowC;ctx.fillRect(t.x,zy,t.w,BH());
       ctx.strokeStyle='rgba(255,180,0,0.35)';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.strokeRect(t.x,zy,t.w,BH());ctx.setLineDash([]);
       ctx.strokeStyle='rgba(255,180,0,0.2)';ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(cur.x+cur.w/2,zy-4);ctx.lineTo(cur.x+cur.w/2,zy+BH()+4);ctx.stroke();
     }
-    if(cur&&status==='dropping'){var td=topOfStack();ctx.fillStyle='rgba(0,0,0,0.06)';ctx.fillRect(td.x,td.y-cam,td.w,BH());}
+    if(cur&&status==='dropping'){var td=topOfStack();ctx.fillStyle='rgba(0,0,0,0.06)';ctx.fillRect(td.x,td.y-cam-stackOffset,td.w,BH());}
 
-    // 当前滑动方块（入场压缩动画 + 3级运动拖影）
+    // 当前上冲方块（底部生成 + 入场 + 3级拖影）
     if(cur){
       if(status==='playing'){
         var sa=cur.spawnAnim||0;
-        var blockScaleY=sa>0?(0.7+sa*0.3):1;  // 入场从0.7压扁弹出到1.0
-        // 3级拖影
+        var blockScaleY=sa>0?(0.7+sa*0.3):1;
         ctx.globalAlpha=0.04;dBlock(cur.x-cur.dir*cur.baseSpeed*9,cur.y-cam,cur.w,BH(),cur.color,0.04);
         ctx.globalAlpha=0.07;dBlock(cur.x-cur.dir*cur.baseSpeed*5,cur.y-cam,cur.w,BH(),cur.color,0.07);
         ctx.globalAlpha=1;
@@ -509,12 +502,10 @@ function create(platform){
       }
     }
 
-    // 飞块 + 粒子
     for(var j=0;j<fps.length;j++){var f=fps[j];dBlock(f.x-f.w/2,f.y-f.h/2-cam,f.w,f.h,f.color,0.9,f.rot);}
     for(var k=0;k<pts.length;k++){var pt=pts[k];ctx.fillStyle=pt.color;ctx.globalAlpha=pt.life;if(pt.shape==='rect'){var s2=pt.size;ctx.fillRect(pt.x-s2/2,pt.y-cam-s2/2,s2,s2);}else{ctx.beginPath();ctx.arc(pt.x,pt.y-cam,pt.size,0,Math.PI*2);ctx.fill();}}
     ctx.globalAlpha=1;
 
-    // 连击时屏幕边缘光晕（替代全屏闪光）
     if(combo>=5&&flashA>0){
       var edgeGrad=ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.8);
       edgeGrad.addColorStop(0,'rgba(255,215,0,0)');edgeGrad.addColorStop(1,'rgba(255,215,0,'+(flashA*0.4)+')');
@@ -529,8 +520,6 @@ function create(platform){
 
   function drawUI(){
     var sY=safeTop+22;
-
-    // 分数（动态渐变，随分数位数调整宽度）
     var scoreStr=String(score);
     ctx.font='900 56px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
     var tw=ctx.measureText(scoreStr).width;
@@ -538,7 +527,6 @@ function create(platform){
     scoreGrad.addColorStop(0,'#ffffff');scoreGrad.addColorStop(1,'#ffd700');
     dText(scoreStr,W/2,sY,56,scoreGrad,'center','rgba(255,107,107,0.25)',18);
 
-    // 关卡标签 + 慢动作
     if(mode==='level'){
       if(curLvData){
         var label='第'+curLvData.id+'关 · '+curLvData.name;
@@ -547,15 +535,13 @@ function create(platform){
         dText(label,W/2,sY+32,12,'rgba(0,0,0,0.4)','center');
       }
     }else if(mode==='daily'){
-      var dlabel=slowMotionActive?'🐢 '+Math.ceil(slowMotionTimer/60)+'s · 今日挑战':'📅 今日挑战';
-      dText(dlabel,W/2,sY+32,12,'rgba(200,140,0,0.7)','center');
+      dText(slowMotionActive?'🐢 '+Math.ceil(slowMotionTimer/60)+'s · 今日挑战':'📅 今日挑战',W/2,sY+32,12,'rgba(200,140,0,0.7)','center');
     }
 
     if(combo>=2&&status!=='gameover'&&status!=='levelcomplete'){
       dText('🔥 '+combo+'x 连击',W/2,sY+50,14,'#e67e00','center','rgba(230,126,0,0.3)',10);
     }
 
-    // 进度条
     if(levelTarget>0&&status!=='idle'&&status!=='levelcomplete'&&status!=='gameover'){
       var barW=Math.min(W*0.60,220),barH=6,barX=W/2-barW/2,barY=sY+68,prog=Math.min(1,score/levelTarget);
       ctx.fillStyle='rgba(0,0,0,0.08)';rrect(barX,barY,barW,barH,3,'rgba(0,0,0,0.08)');
@@ -565,23 +551,21 @@ function create(platform){
       dText(score+'/'+levelTarget,W/2,barY+14,11,prog>=1?'#4ade80':'rgba(0,0,0,0.4)','center');
     }
 
-    // Idle 提示
     if(status==='idle'){
       var p2=Math.sin(Date.now()/800)*0.3+0.5;
       ctx.textAlign='center';
       ctx.font='bold 22px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
       ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillText('🪜 弹弹塔',W/2,H*0.66);
       ctx.font='600 16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
-      ctx.fillStyle='rgba(0,0,0,'+(p2*0.6)+')';ctx.fillText('👆 点击屏幕开始',W/2,H*0.72);
+      ctx.fillStyle='rgba(0,0,0,'+(p2*0.6)+')';ctx.fillText('👆 点击屏幕出发！',W/2,H*0.72);
       ctx.font='12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
-      ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillText('对准下方方块，完美落地会变宽！',W/2,H*0.72+26);
+      ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillText('下方方块会向上冲刺，对准上面不动的方块',W/2,H*0.72+26);
       if(mode==='level'&&levelTarget>0&&curLvData){
         ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillText('🎯 目标 '+curLvData.target+' 层 — '+curLvData.desc,W/2,H*0.72+44);
       }
       if(stats.dailyStreak>=2){ctx.font='11px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.fillStyle='rgba(230,120,0,0.7)';ctx.fillText('🔥 连续登录 '+stats.dailyStreak+' 天',W/2,H*0.72+62);}
     }
 
-    // Combo pop
     if(cpt>0&&cpText){var pa=cpt>30?1:cpt/30,ps2=1+(55-cpt)*0.008;ctx.save();ctx.globalAlpha=pa;ctx.translate(W/2,H*0.30);ctx.scale(ps2,ps2);dText(cpText,0,0,44,cpColor,'center',cpColor,35);ctx.restore();}
   }
 
@@ -591,7 +575,7 @@ function create(platform){
     cc.font='bold 28px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillStyle='#ffffff';cc.fillText('🪜 弹弹塔',cw/2,ch*0.18);
     cc.font='900 72px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.shadowColor='rgba(255,215,0,0.5)';cc.shadowBlur=30;cc.fillStyle='#ffd700';cc.fillText(String(score),cw/2,ch*0.45);cc.shadowColor='transparent';cc.shadowBlur=0;
     if(mode==='level'&&curLvData)cc.fillText('第'+curLvData.id+'关 · '+curLvData.name+' · '+starsEarned+'星',cw/2,ch*0.55);
-    cc.font='16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.fillStyle='rgba(255,255,255,0.5)';cc.fillText('来挑战我吧! 微信搜「弹弹塔」',cw/2,ch*0.85);
+    cc.font='16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.fillStyle='rgba(255,255,255,0.5)';cc.fillText('来挑战我吧！',cw/2,ch*0.85);
   }
 
   var paused=false,bgmWasPlaying=false;
