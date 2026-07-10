@@ -476,17 +476,16 @@ function create(platform){
   function dBlock(x,y,w,h,c,a,rot,scaleY){
     a=a===undefined?1:a;rot=rot||0;scaleY=scaleY||1;
     ctx.save();ctx.translate(x+w/2,y+h/2);
-    if(scaleY!==1)ctx.scale(1,scaleY);  // ✅ 先缩放再绘图，让弹性动画生效
+    if(scaleY!==1)ctx.scale(1,scaleY);
     if(rot!==0)ctx.rotate(rot);
     ctx.globalAlpha=a;
-    ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
+    ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=5;ctx.shadowOffsetY=2;
     var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
-    g.addColorStop(0,shade(c,25));g.addColorStop(0.15,c);g.addColorStop(0.85,shade(c,-15));g.addColorStop(1,shade(c,-35));
+    g.addColorStop(0,shade(c,20));g.addColorStop(0.5,c);g.addColorStop(1,shade(c,-30));
     rrect(-w/2,-h/2,w,h,4,g);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(-w/2+5,-h/2+2,w-10,Math.min(5,h*0.12));
-    ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(-w/2,-h/2+h-4,w,3);
-    ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(-w/2,-h/2+4,2,h-8);ctx.fillRect(w/2-2,-h/2+4,2,h-8);
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(-w/2+3,-h/2+2,w-6,Math.min(4,h*0.1));
+    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(-w/2,-h/2+h-2,w,2);
     ctx.restore();
   }
   function dText(t,x,y,s,c,a,sc,sb){a=a||'center';sb=sb||0;ctx.font='900 '+s+'px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign=a;ctx.textBaseline='middle';if(sb>0&&sc){ctx.shadowColor=sc;ctx.shadowBlur=sb;}ctx.fillStyle=c;ctx.fillText(t,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;}
