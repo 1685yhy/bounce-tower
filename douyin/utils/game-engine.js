@@ -119,7 +119,7 @@ function create(platform){
   var stackOffset = 0;                               // 堆叠逐块上移偏移量
 
   function BH(){return Math.max(22,W*0.075);}
-  function IBW(){var base=Math.min(W*0.5,200);var lv=LEVELS[levelId-1];var pct=lv?lv.widthPct:0.8;return Math.max(35,Math.round(base*pct));}
+  function IBW(){var base=Math.min(W*0.5,200);var pct=levelWidthPct||(curLvData?curLvData.widthPct:0.8);return Math.max(35,Math.round(base*pct));}
   function PERF(){return Math.max(4,Math.round(IBW()*0.06));}
   function SPB(){return W*0.014;}
   function SPI(){return W*0.000026;}
@@ -127,7 +127,7 @@ function create(platform){
   var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0;
   var camY=0,tCamY=0,pts=[],fps=[],dp=0,dtY=0,cpt=0,cpText='',cpColor='#fff';
   var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0;
-  var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,starsEarned=0,curLvData=LEVELS[0];
+  var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,levelWidthPct=0,starsEarned=0,curLvData=LEVELS[0],dailyMutatorId='';
   var themeId='default',pals=THEMES.default.pals,bgColors=THEMES.default.bg,pi=0,ci=0;
   var slowMotionTimer=0,slowMotionActive=false;
   var landAnim=0;
@@ -296,7 +296,7 @@ function create(platform){
 
     if(isPerf){
       combo++;if(combo>maxCombo)maxCombo=combo;perfCount++;stats.totalPerfects++;flushStats();
-      if(combo>=3){
+      if(combo>=3&&dailyMutatorId!=='no_combo'){
         var bonus=Math.min(combo*1.5,20);
         var cap=Math.max(IBW()*1.1,IBW()+bonus*0.8);
         pb.w=Math.min(pb.w+bonus,cap);
@@ -313,10 +313,10 @@ function create(platform){
     cur=null;dp=0;
 
     // 里程碑：每10层庆祝
-    if(score%10===0){
+    if(score%10===0&&score<levelTarget){
       spawnPts(W/2,H*0.4,8,'#ffd700',1.5);
       flashA=0.2;flashC='#ffd700';
-      cpText='🎯 '+score+' 层!';cpColor='#ffd700';cpt=40;
+      cpText='🎯 '+score+' 层!';cpColor='#ffd700';cpt=55;
     }
 
     if(score>=levelTarget){
@@ -364,7 +364,9 @@ function create(platform){
     persistStats();
   }
 
-  function revive(){if(status!=='gameover')return;status='playing';shake=0;flashA=0;combo=0;perfCount=0;slowMotionActive=false;slowMotionTimer=0;spawnBlock();}
+  function revive(){if(status!=='gameover'||!checkpointScore)return;
+    checkpointScore=0;stats.totalGames--;  // 回退stats，不算新一局
+    status='playing';shake=0;flashA=0;combo=0;perfCount=0;slowMotionActive=false;slowMotionTimer=0;spawnBlock();}
 
   function useTool(toolName){
     if(status!=='playing'||!cur)return false;
@@ -397,7 +399,7 @@ function create(platform){
   function getShareRefillsLeft(){return 3-(stats.shareRefills||0);}
 
   function setMode(m,opts){
-    opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;
+    opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;levelWidthPct=opts.widthPct||0;dailyMutatorId=opts.mutatorId||'';
     curLvData=LEVELS[levelId-1]||LEVELS[0];
     bgDirty=true;flashA=0.4;flashC='#ffffff';reset();
     try{render();}catch(e){}
@@ -407,7 +409,7 @@ function create(platform){
     pi=Math.floor(Math.random()*pals.length);ci=0;
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
     camY=0;tCamY=0;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
-    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;checkpointScore=0;
+    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;checkpointScore=0;dailyMutatorId='';
     paused=false;bgmWasPlaying=false;
     status='idle';
   }
@@ -422,8 +424,8 @@ function create(platform){
   var DAILY_MUTATORS=[
     {id:'speed',name:'极速模式',desc:'速度+30%',apply:function(s){s.speedMul*=1.3;}},
     {id:'narrow',name:'刀锋之上',desc:'宽度-15%',apply:function(s){s.widthPct*=0.85;}},
-    {id:'no_combo',name:'孤军奋战',desc:'连击奖励关闭',apply:function(s){}},
-    {id:'endless',name:'无限挑战',desc:'关卡无上限',apply:function(s){}},
+    {id:'no_combo',name:'孤军奋战',desc:'连击奖励关闭',apply:function(s){s.noCombo=1;}},
+    {id:'endless',name:'无限挑战',desc:'目标翻倍',apply:function(s){s.target*=2;}},
   ];
   function getDailyChallenge(){
     var today=new Date().toISOString().slice(0,10),h=hash(today);
