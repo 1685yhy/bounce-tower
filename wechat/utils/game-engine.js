@@ -9,7 +9,6 @@
 'use strict';
 
 var LEVELS = [
-  {id:1, name:'你好世界',   target:8,   speedMul:0.35, widthPct:0.85, desc:'慢速简单，找找感觉'},
   {id:1, name:'你好世界',   target:8,   speedMul:0.5, widthPct:0.85, desc:'慢速简单，熟悉操作'},
   {id:2, name:'地狱之门',   target:12,  speedMul:1.0, widthPct:0.68, desc:'依然简单，适应移动'},
   {id:3, name:'喘口气',     target:10,  speedMul:0.7, widthPct:0.74, desc:'缓一缓'},
@@ -389,6 +388,7 @@ function create(platform){
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
     camY=0;tCamY=0;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
     slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;
+    paused=false;bgmWasPlaying=false;
     status='idle';
   }
   function refreshTheme(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;bgDirty=true;}
@@ -536,7 +536,7 @@ function create(platform){
       if(curLvData){
         var label='第'+curLvData.id+'关 · '+curLvData.name;
         if(slowMotionActive)label='🐢 '+Math.ceil(slowMotionTimer/60)+'s · '+label;
-        if(levelId>=31&&score>=5){var accelNow=Math.min(1+Math.floor(score/5)*0.05,1.6);if(accelNow>1)label+=' ⚡'+accelNow.toFixed(1)+'x';}
+        if(levelId>=31&&score>=5){var accelNow=Math.min(1+Math.floor(score/5)*0.03,1.1);if(accelNow>1)label+=' ⚡'+accelNow.toFixed(2)+'x';}
         dText(label,W/2,sY+32,12,'rgba(0,0,0,0.4)','center');
       }
     }else if(mode==='daily'){
