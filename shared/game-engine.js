@@ -126,7 +126,7 @@ function create(platform){
 
   var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0;
   var camY=0,tCamY=0,pts=[],fps=[],dp=0,dtY=0,cpt=0,cpText='',cpColor='#fff';
-  var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0,rafWatchdog=null;
+  var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0;
   var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,starsEarned=0,curLvData=LEVELS[0];
   var themeId='default',pals=THEMES.default.pals,bgColors=THEMES.default.bg,pi=0,ci=0;
 
@@ -269,13 +269,9 @@ function create(platform){
     }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,t.y+BH()/2,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);if(platform.vibrate)platform.vibrate('medium');}}}
     tCamY=Math.max(0,t.y-H*0.35);cur=null;dp=0;
 
-    if(mode==='level'&&score>=levelTarget){
+    if(score>=levelTarget){
       var stars=1;if(score>=levelTarget*1.5)stars=3;else if(score>=levelTarget*1.2)stars=2;
       completeLevel(stars);
-    }
-    if(mode==='daily'&&score>=levelTarget){
-      var ds=1;if(score>=levelTarget*1.5)ds=3;else if(score>=levelTarget*1.2)ds=2;
-      completeLevel(ds);
     }
   }
 
@@ -286,6 +282,7 @@ function create(platform){
     }else{
       var today=new Date().toISOString().slice(0,10),prev=stats.dailyBest[today]||0;if(stars>prev){stats.dailyBest[today]=stars;flushStats();persistStats();}
     }
+    bgmStop();
     onLevelComplete({mode:mode,levelId:levelId,stars:stars,score:score,maxCombo:maxCombo,layers:stack.length,wasNewBest:wasNewBest});
     spawnPts(W/2,H/2,stars*10,stars>=3?'#ffd700':stars>=2?'#c0c0c0':'#cd7f32',2.5);
     flashA=0.5;flashC=stars>=3?'#ffd700':'#ffffff';sfxStar();
@@ -517,7 +514,7 @@ function create(platform){
   function onVisibility(){
     if(document.hidden){
       paused=true;bgmWasPlaying=bgmPlaying;bgmStop();
-      if(rafWatchdog){clearTimeout(rafWatchdog);rafWatchdog=null;}
+
     }else{
       paused=false;
       if(bgmWasPlaying)bgmStart();
@@ -529,7 +526,7 @@ function create(platform){
   try{render();}catch(e){}
   loop();}
   function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();}
-  function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=null;rafId=null;}
+  function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);rafId=null;}
 
   function resizeViewport(w,h){W=w;H=h;}
 

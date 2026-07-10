@@ -1,62 +1,86 @@
 /**
  * ============================================================
- *  弹弹塔 Bounce Tower — 共享游戏引擎 v4.0
- *  羊了个羊式设计：第1关极简→断崖变难→道具裂变
- *  闯关(30关) + 每日挑战(引爆点)
+ *  弹弹塔 Bounce Tower — 共享游戏引擎 v5.0
+ *  奇数关缓冲·偶数关断崖·每5关难度峰值·31关起关内变速
+ *  闯关(50关) + 每日挑战
  * ============================================================
  */
 (function(global){
 'use strict';
 
-// ========== 30关 — 羊了个羊式心理曲线 ==========
-// 第1关极简(人人过)→第3关断崖→奖励关穿插→末尾传说
+// ========== 50关 — 羊了个羊式心理曲线 ==========
+// 奇数关缓冲·偶数关断崖·每5关难度峰值·31关起关内变速
 var LEVELS = [
-  {id:1, name:'你好世界',    target:2,  speedMul:0.3, desc:'闭着眼都能过'},
-  {id:2, name:'地狱之门',    target:5,  speedMul:1.8, desc:'第2关 · 90%死在这'},
-  {id:3, name:'才刚开始',    target:5,  speedMul:1.4, desc:'继续继续'},
-  {id:4, name:'升温',        target:6,  speedMul:1.6, desc:'手开始冒汗'},
-  {id:5, name:'别放松',      target:6,  speedMul:1.3, desc:'下一关更难'},
-  {id:6, name:'步步惊心',    target:8,  speedMul:1.7, desc:'集中注意力'},
-  {id:7, name:'稍微缓缓',    target:8,  speedMul:1.4, desc:'别被骗了'},
-  {id:8, name:'加速',        target:10, speedMul:1.8, desc:'手指在发抖'},
-  {id:9, name:'稳住',        target:10, speedMul:1.5, desc:'你能行的'},
-  {id:10,name:'分水岭',      target:12, speedMul:1.9, desc:'⭐ 半数玩家在此止步'},
-  {id:11,name:'悬崖勒马',    target:12, speedMul:1.5, desc:'快用道具'},
-  {id:12,name:'真刀真枪',    target:15, speedMul:1.9, desc:'超过70%玩家'},
-  {id:13,name:'喘息之间',    target:15, speedMul:1.6, desc:'让你歇一秒'},
-  {id:14,name:'地狱深处',    target:18, speedMul:2.0, desc:'只有30%能过'},
-  {id:15,name:'里程碑',      target:18, speedMul:1.7, desc:'⭐ 你已经很强了'},
-  {id:16,name:'精英门槛',    target:20, speedMul:2.0, desc:'前20%玩家'},
-  {id:17,name:'暴风雨前',    target:20, speedMul:1.7, desc:'给你歇口气'},
-  {id:18,name:'极限挑战',    target:24, speedMul:2.2, desc:'只有10%能看到这'},
-  {id:19,name:'绿洲',        target:24, speedMul:1.8, desc:'最后的温柔'},
-  {id:20,name:'生死线',      target:28, speedMul:2.4, desc:'⭐ 前5%·传说门槛'},
-  {id:21,name:'大师入门',    target:28, speedMul:2.0, desc:'大师联赛'},
-  {id:22,name:'狂风暴雨',    target:32, speedMul:2.5, desc:'确定还要继续？'},
-  {id:23,name:'休整',        target:32, speedMul:2.1, desc:'最后休息站'},
-  {id:24,name:'不归路',      target:38, speedMul:2.7, desc:'只有1%能看到这'},
-  {id:25,name:'传奇',        target:38, speedMul:2.3, desc:'⭐ 前1%·炫耀资格'},
-  {id:26,name:'神之试炼',    target:45, speedMul:2.8, desc:'0.1%通关率'},
-  {id:27,name:'天堑',        target:45, speedMul:2.5, desc:'难以置信'},
-  {id:28,name:'登天之路',    target:55, speedMul:3.0, desc:'传奇诞生中'},
-  {id:29,name:'最后之门',    target:55, speedMul:2.7, desc:'没有人相信'},
-  {id:30,name:'弹弹之神',    target:65, speedMul:3.5, desc:'👑 0.001%·你是神'},
+  {id:1, name:'你好世界',   target:8,   speedMul:0.6, widthPct:0.80, desc:'闭着眼都能过'},
+  {id:2, name:'地狱之门',   target:15,  speedMul:2.0, widthPct:0.55, desc:'90%玩家死在这'},
+  {id:3, name:'喘口气',     target:12,  speedMul:1.0, widthPct:0.65, desc:'缓一缓'},
+  {id:4, name:'升温',       target:20,  speedMul:2.3, widthPct:0.45, desc:'手开始冒汗'},
+  {id:5, name:'节奏来了',   target:14,  speedMul:1.1, widthPct:0.60, desc:'⭐ 找到感觉了'},
+  {id:6, name:'步步惊心',   target:22,  speedMul:2.4, widthPct:0.43, desc:'集中注意力'},
+  {id:7, name:'稍微缓缓',   target:16,  speedMul:1.2, widthPct:0.58, desc:'别被骗了'},
+  {id:8, name:'加速',       target:25,  speedMul:2.5, widthPct:0.40, desc:'手指在发抖'},
+  {id:9, name:'稳住',       target:18,  speedMul:1.3, widthPct:0.55, desc:'你能行的'},
+  {id:10,name:'分水岭',     target:35,  speedMul:2.5, widthPct:0.38, desc:'⭐ 半数玩家止步于此'},
+  {id:11,name:'悬崖勒马',   target:20,  speedMul:1.4, widthPct:0.52, desc:'快用道具'},
+  {id:12,name:'真刀真枪',   target:30,  speedMul:2.6, widthPct:0.35, desc:'超过70%玩家'},
+  {id:13,name:'喘息之间',   target:22,  speedMul:1.5, widthPct:0.50, desc:'让你歇一秒'},
+  {id:14,name:'地狱深处',   target:35,  speedMul:2.7, widthPct:0.32, desc:'只有30%能过'},
+  {id:15,name:'里程碑',     target:25,  speedMul:1.5, widthPct:0.48, desc:'⭐ 你已经很强了'},
+  {id:16,name:'精英门槛',   target:40,  speedMul:2.8, widthPct:0.30, desc:'前20%玩家'},
+  {id:17,name:'暴风雨前',   target:28,  speedMul:1.6, widthPct:0.46, desc:'给你歇口气'},
+  {id:18,name:'极限挑战',   target:45,  speedMul:2.9, widthPct:0.28, desc:'只有10%能看到这'},
+  {id:19,name:'绿洲',       target:30,  speedMul:1.6, widthPct:0.44, desc:'最后的温柔'},
+  {id:20,name:'生死线',     target:60,  speedMul:3.0, widthPct:0.28, desc:'⭐ 前5%·传说门槛'},
+  {id:21,name:'大师入门',   target:35,  speedMul:1.8, widthPct:0.42, desc:'大师联赛'},
+  {id:22,name:'狂风暴雨',   target:55,  speedMul:3.1, widthPct:0.26, desc:'确定还要继续？'},
+  {id:23,name:'休整',       target:38,  speedMul:1.8, widthPct:0.40, desc:'最后休息站'},
+  {id:24,name:'不归路',     target:65,  speedMul:3.2, widthPct:0.24, desc:'只有1%能看到这'},
+  {id:25,name:'传奇',       target:42,  speedMul:1.9, widthPct:0.38, desc:'⭐ 前1%·炫耀资格'},
+  {id:26,name:'神之试炼',   target:70,  speedMul:3.3, widthPct:0.22, desc:'0.1%通关率'},
+  {id:27,name:'天堑',       target:48,  speedMul:2.0, widthPct:0.36, desc:'难以置信'},
+  {id:28,name:'登天之路',   target:80,  speedMul:3.4, widthPct:0.20, desc:'传奇诞生中'},
+  {id:29,name:'最后之门',   target:55,  speedMul:2.1, widthPct:0.34, desc:'没有人相信'},
+  {id:30,name:'弹弹神话',   target:85,  speedMul:3.5, widthPct:0.22, desc:'👑 前1%'},
+  {id:31,name:'封神之路',   target:60,  speedMul:2.2, widthPct:0.32, desc:'变速开始，捉摸不定'},
+  {id:32,name:'疾风骤雨',   target:90,  speedMul:3.6, widthPct:0.20, desc:'0.8%通关率'},
+  {id:33,name:'大师修炼',   target:65,  speedMul:2.3, widthPct:0.30, desc:'节奏变了'},
+  {id:34,name:'百层挑战',   target:100, speedMul:3.7, widthPct:0.18, desc:'0.5%通关率'},
+  {id:35,name:'风暴之眼',   target:70,  speedMul:2.4, widthPct:0.28, desc:'⭐ 1.5%玩家到这里'},
+  {id:36,name:'混沌之门',   target:110, speedMul:3.8, widthPct:0.17, desc:'0.3%通关率'},
+  {id:37,name:'逆流而上',   target:75,  speedMul:2.5, widthPct:0.26, desc:'越来越快'},
+  {id:38,name:'深渊凝视',   target:120, speedMul:3.9, widthPct:0.16, desc:'0.2%通关率'},
+  {id:39,name:'意志之战',   target:80,  speedMul:2.6, widthPct:0.24, desc:'毅力的考验'},
+  {id:40,name:'极限突破',   target:130, speedMul:4.0, widthPct:0.15, desc:'⭐ 0.15%·封神门槛'},
+  {id:41,name:'神域之路',   target:85,  speedMul:2.7, widthPct:0.23, desc:'常人难以企及'},
+  {id:42,name:'天罚',       target:135, speedMul:4.1, widthPct:0.14, desc:'0.1%通关率'},
+  {id:43,name:'超凡脱俗',   target:90,  speedMul:2.8, widthPct:0.22, desc:'传说级别'},
+  {id:44,name:'神罚降临',   target:140, speedMul:4.2, widthPct:0.13, desc:'0.05%通关率'},
+  {id:45,name:'封神候选',   target:95,  speedMul:2.9, widthPct:0.21, desc:'⭐ 万里挑一'},
+  {id:46,name:'末日审判',   target:145, speedMul:4.3, widthPct:0.12, desc:'0.01%通关率'},
+  {id:47,name:'神迹之前',   target:100, speedMul:3.0, widthPct:0.20, desc:'百层成就'},
+  {id:48,name:'混沌深渊',   target:147, speedMul:4.4, widthPct:0.11, desc:'0.005%通关率'},
+  {id:49,name:'封神之战',   target:105, speedMul:3.1, widthPct:0.19, desc:'最后的修炼'},
+  {id:50,name:'弹弹之神',   target:150, speedMul:4.5, widthPct:0.15, desc:'👑 0.001%·你是神'},
 ];
 
 var ACHIEVEMENTS = [
   {id:'first_game',name:'初次尝试',desc:'完成第一局',icon:'🎮'},
-  {id:'level_5',name:'小有所成',desc:'通过第 5 关',icon:'⭐'},
+  {id:'level_5', name:'小有所成',desc:'通过第 5 关',icon:'⭐'},
   {id:'level_10',name:'渐入佳境',desc:'通过第 10 关',icon:'🌟'},
   {id:'level_15',name:'势不可挡',desc:'通过第 15 关',icon:'💫'},
   {id:'level_20',name:'大师风范',desc:'通过第 20 关',icon:'🏆'},
   {id:'level_25',name:'登峰造极',desc:'通过第 25 关',icon:'👑'},
-  {id:'level_30',name:'弹弹之神',desc:'通关全部 30 关',icon:'🗼'},
-  {id:'combo_5',name:'手感火热',desc:'达成 5 连击',icon:'🔥'},
+  {id:'level_30',name:'传说降临',desc:'通过第 30 关',icon:'🔥'},
+  {id:'level_35',name:'封神之路',desc:'通过第 35 关',icon:'⚡'},
+  {id:'level_40',name:'极限突破',desc:'通过第 40 关',icon:'💎'},
+  {id:'level_45',name:'万里挑一',desc:'通过第 45 关',icon:'🌈'},
+  {id:'level_50',name:'弹弹之神',desc:'通关全部 50 关',icon:'👑'},
+  {id:'combo_5', name:'手感火热',desc:'达成 5 连击',icon:'🔥'},
   {id:'combo_10',name:'人机合一',desc:'达成 10 连击',icon:'⚡'},
-  {id:'combo_20',name:'神之手',desc:'达成 20 连击',icon:'👑'},
-  {id:'layer_50',name:'摩天大楼',desc:'单局 50 层',icon:'🏢'},
-  {id:'layer_100',name:'通天塔',desc:'单局 100 层',icon:'🗼'},
-  {id:'games_50',name:'铁粉',desc:'累计玩 50 局',icon:'💎'},
+  {id:'combo_20',name:'神之手',  desc:'达成 20 连击',icon:'👑'},
+  {id:'layer_50', name:'摩天大楼',desc:'单局 50 层',icon:'🏢'},
+  {id:'layer_100',name:'通天塔', desc:'单局 100 层',icon:'🗼'},
+  {id:'games_50', name:'铁粉',   desc:'累计玩 50 局',icon:'💎'},
   {id:'total_1000',name:'堆叠大师',desc:'累计 1000 层',icon:'🏆'},
   {id:'skins_all',name:'皮肤收藏家',desc:'解锁全部皮肤',icon:'🌈'},
 ];
@@ -71,7 +95,7 @@ var THEMES = {
 };
 
 function lerp(a,b,t){return a+(b-a)*t;}
-function shade(c,p){var n=parseInt(c.replace('#',''),16),a=Math.round(2.55*p);var R=Math.max(0,Math.min(255,(n>>16)+a)),G=Math.max(0,Math.min(255,(n>>8&0x00FF00)+a)),B=Math.max(0,Math.min(255,(n&0x0000FF)+a));return'rgb('+R+','+G+','+B+')';}
+function shade(c,p){var n=parseInt(c.replace('#',''),16),a=Math.round(2.55*p);var R=Math.max(0,Math.min(255,(n>>16&0xFF)+a)),G=Math.max(0,Math.min(255,(n>>8&0xFF)+a)),B=Math.max(0,Math.min(255,(n&0xFF)+a));return'rgb('+R+','+G+','+B+')';}
 function eOutBounce(t){var n1=7.5625,d1=2.75;if(t<1/d1)return n1*t*t;else if(t<2/d1){t-=1.5/d1;return n1*t*t+0.75;}else if(t<2.5/d1){t-=2.25/d1;return n1*t*t+0.9375;}else{t-=2.625/d1;return n1*t*t+0.984375;}}
 function hash(s){var h=0;for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return Math.abs(h);}
 
@@ -90,15 +114,20 @@ function create(platform){
   var useNativeUI=platform.useNativeUI||false;
 
   function BH(){return Math.max(22,W*0.075);}
-  function IBW(){var base=Math.min(W*0.5,200);if(levelId===1)return base;return Math.max(70,base-(levelId-1)*5);}
+  function IBW(){
+    var base=Math.min(W*0.5,200);
+    var lv=LEVELS[levelId-1];
+    var pct=lv?lv.widthPct:0.8;
+    return Math.max(40,Math.round(base*pct));
+  }
   var PERF=4;
   function SPB(){return W*0.014;}
   function SPI(){return W*0.00055;}
 
   var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0;
   var camY=0,tCamY=0,pts=[],fps=[],dp=0,dtY=0,cpt=0,cpText='',cpColor='#fff';
-  var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0,rafWatchdog=null,scorePopTimer=0;
-  var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,starsEarned=0;
+  var shake=0,flashA=0,flashC='#fff',wasNewBest=false,rafId=null,destroyed=false,lastFrameTime=0;
+  var mode='level',levelId=1,levelTarget=0,levelSpeedMul=1,starsEarned=0,curLvData=LEVELS[0];
   var themeId='default',pals=THEMES.default.pals,bgColors=THEMES.default.bg,pi=0,ci=0;
 
   // 道具
@@ -155,7 +184,8 @@ function create(platform){
   if(!stats.unlockedAchievements)stats.unlockedAchievements=[];
   if(!stats.levelStars)stats.levelStars={};
   if(!stats.dailyBest)stats.dailyBest={};
-  if(!stats.tools)stats.tools={slow:0,widen:0};
+  if(!stats.tools)stats.tools={slow:0,widen:0,reverse:0};
+  if(stats.tools.reverse===undefined)stats.tools.reverse=0;
   if(!stats.levelAttempts)stats.levelAttempts={};
   var statsDirty=false;
   function flushStats(){statsDirty=true;}
@@ -169,12 +199,16 @@ function create(platform){
         var cond=false;
         switch(a.id){
           case'first_game':cond=gameStats.totalGames>=1;break;
-          case'level_5':cond=getLevelProgress()>=5;break;
+          case'level_5': cond=getLevelProgress()>=5;break;
           case'level_10':cond=getLevelProgress()>=10;break;
           case'level_15':cond=getLevelProgress()>=15;break;
           case'level_20':cond=getLevelProgress()>=20;break;
           case'level_25':cond=getLevelProgress()>=25;break;
           case'level_30':cond=getLevelProgress()>=30;break;
+          case'level_35':cond=getLevelProgress()>=35;break;
+          case'level_40':cond=getLevelProgress()>=40;break;
+          case'level_45':cond=getLevelProgress()>=45;break;
+          case'level_50':cond=getLevelProgress()>=50;break;
           case'combo_5':cond=gameStats.maxCombo>=5;break;
           case'combo_10':cond=gameStats.maxCombo>=10;break;
           case'combo_20':cond=gameStats.maxCombo>=20;break;
@@ -193,7 +227,6 @@ function create(platform){
 
   function getLevelProgress(){var max=0;for(var key in stats.levelStars){if(stats.levelStars[key]>=1){var lv=parseInt(key,10);if(lv>max)max=lv;}}return max;}
   function getTotalStars(){var t=0;for(var key in stats.levelStars)t+=stats.levelStars[key];return t;}
-  function getPassRate(lv){var attempts=stats.levelAttempts[lv]||0;if(attempts===0)return 99;var clears=(stats.levelStars[lv]||0)>=1?1:0;return Math.round((1/attempts)*100);}
 
   function topOfStack(){if(stack.length===0)return{x:W/2-IBW()/2,y:H*0.65,w:IBW()};var t=stack[stack.length-1];return{x:t.x,y:t.y+BH(),w:t.w};}
   function swBounds(bw){var t=topOfStack(),hs=t.w/2,hb=bw/2,cx=t.x+hs;
@@ -202,11 +235,17 @@ function create(platform){
   var extra=t.w*extraMul;
   return{min:cx-hs-hb-extra,max:cx+hs+hb+extra,cx:cx};}
 
+  function HOVER(){return BH()*1.4;}  // 滑块悬浮在堆顶上方的距离
   function spawnBlock(){
     var t=topOfStack(),w=t.w,b=swBounds(w),fromR=stack.length%2===0;
     var spd=(SPB()+score*SPI())*levelSpeedMul;
-    if(slowMotionActive)spd*=0.3;
-    cur={x:fromR?b.max:b.min,y:t.y+BH()+2,w:w,color:nc(),dir:fromR?-1:1,speed:spd,spawnAnim:8};
+    // 31关以后：每落5层加速5%，最高加速到初始的1.6倍（在关内逐渐变快）
+    if(levelId>=31){
+      var accel=Math.min(1+Math.floor(score/5)*0.05,1.6);
+      spd*=accel;
+    }
+    // 存原始速度，慢动作倍率在 update 里动态应用，避免嵌套叠加
+    cur={x:fromR?b.max:b.min,y:t.y-HOVER(),w:w,color:nc(),dir:fromR?-1:1,speed:spd,baseSpeed:spd,spawnAnim:8};
     dp=0;status='playing';
   }
   function dropBlock(){if(status!=='playing'||!cur)return;dp=0;dtY=topOfStack().y;status='dropping';}
@@ -217,7 +256,7 @@ function create(platform){
     var isPerf=Math.abs(b.x-t.x)<=PERF;var cutLoss=isPerf?0:Math.abs(b.x-t.x)*0.3;var finalW=Math.max(30,oW-cutLoss);var pb={x:oL+(oW-finalW)/2,y:t.y,w:finalW,color:b.color};
     if(bL<sL)fps.push({x:bL,y:t.y,w:sL-bL,h:BH(),color:b.color,vy:-1,vx:-2-Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
     if(bR>sR)fps.push({x:sR,y:t.y,w:bR-sR,h:BH(),color:b.color,vy:-1,vx:2+Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
-    stack.push(pb);score++;scorePopTimer=20;wasNewBest=false;
+    stack.push(pb);score++;wasNewBest=false;
     if(score>bestScore){bestScore=score;wasNewBest=true;saveBest(bestScore);onNewBest(score);}
     stats.totalLayers++;flushStats();
 
@@ -230,13 +269,9 @@ function create(platform){
     }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,t.y+BH()/2,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);if(platform.vibrate)platform.vibrate('medium');}}}
     tCamY=Math.max(0,t.y-H*0.35);cur=null;dp=0;
 
-    if(mode==='level'&&score>=levelTarget){
+    if(score>=levelTarget){
       var stars=1;if(score>=levelTarget*1.5)stars=3;else if(score>=levelTarget*1.2)stars=2;
       completeLevel(stars);
-    }
-    if(mode==='daily'&&score>=levelTarget){
-      var ds=1;if(score>=levelTarget*1.5)ds=3;else if(score>=levelTarget*1.2)ds=2;
-      completeLevel(ds);
     }
   }
 
@@ -247,6 +282,7 @@ function create(platform){
     }else{
       var today=new Date().toISOString().slice(0,10),prev=stats.dailyBest[today]||0;if(stars>prev){stats.dailyBest[today]=stars;flushStats();persistStats();}
     }
+    bgmStop();
     onLevelComplete({mode:mode,levelId:levelId,stars:stars,score:score,maxCombo:maxCombo,layers:stack.length,wasNewBest:wasNewBest});
     spawnPts(W/2,H/2,stars*10,stars>=3?'#ffd700':stars>=2?'#c0c0c0':'#cd7f32',2.5);
     flashA=0.5;flashC=stars>=3?'#ffd700':'#ffffff';sfxStar();
@@ -255,18 +291,18 @@ function create(platform){
   }
 
   function gameOver(){
-    status='gameover';sfxMiss();
+    status='gameover';sfxMiss();bgmStop();
     if(cur){
         fps.push({x:cur.x,y:cur.y,w:cur.w,h:BH(),color:cur.color,vy:-4,vx:(Math.random()-0.5)*6,rot:0,rs:(Math.random()-0.5)*0.25});
         for(var di=0;di<12;di++){var da=Math.random()*Math.PI*2,ds=3+Math.random()*8;
           pts.push({x:cur.x+cur.w/2,y:cur.y+BH()/2,vx:Math.cos(da)*ds,vy:Math.sin(da)*ds-5,life:1,decay:0.015+Math.random()*0.03,size:3+Math.random()*5,color:cur.color});
         }
         cur=null;}
-    shake=20;flashA=0.7;flashC=levelId<=2?'#ff4444':levelId<=10?'#ff6b6b':levelId<=20?'#ff3366':'#cc0033';for(var di2=0;di2<stack.length;di2++){var b2=stack[di2];if(Math.random()<0.3)spawnPts(b2.x+b2.w/2,b2.y+BH()/2,3,b2.color,0.5);}slowMotionActive=false;slowMotionTimer=0;
+    shake=20;flashA=0.7;flashC=levelId<=2?'#ff4444':levelId<=10?'#ff6b6b':levelId<=20?'#ff3366':levelId<=35?'#cc0033':'#8800cc';for(var di2=0;di2<stack.length;di2++){var b2=stack[di2];if(Math.random()<0.3)spawnPts(b2.x+b2.w/2,b2.y+BH()/2,3,b2.color,0.5);}slowMotionActive=false;slowMotionTimer=0;
     stats.totalGames++;if(maxCombo>stats.bestComboEver)stats.bestComboEver=maxCombo;
     if(mode==='level'){stats.levelAttempts[levelId]=(stats.levelAttempts[levelId]||0)+1;}
     var today=new Date().toISOString().slice(0,10);
-    if(stats.lastPlayDate!==today){if(stats.lastPlayDate===''||(new Date(today)-new Date(stats.lastPlayDate))<=86400000*2)stats.dailyStreak++;else stats.dailyStreak=1;stats.lastPlayDate=today;}
+    if(stats.lastPlayDate!==today){var diff=stats.lastPlayDate?Math.round((new Date(today)-new Date(stats.lastPlayDate))/86400000):0;if(diff===1)stats.dailyStreak++;else stats.dailyStreak=1;stats.lastPlayDate=today;}
     flushStats();checkAchievements({totalGames:stats.totalGames,score:score,maxCombo:maxCombo});
     onGameOver(score,maxCombo,stack.length,wasNewBest,mode,levelId,levelTarget);
     persistStats();
@@ -316,14 +352,14 @@ function create(platform){
   }
   function getShareRefillsLeft(){return 3-(stats.shareRefills||0);}
 
-  function setMode(m,opts){opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;flashA=0.4;flashC='#ffffff';reset();
+  function setMode(m,opts){opts=opts||{};mode=m;levelId=opts.levelId||1;levelTarget=opts.target||0;levelSpeedMul=opts.speedMul||1;curLvData=LEVELS[levelId-1]||LEVELS[0];flashA=0.4;flashC='#ffffff';reset();
   try{render();}catch(e){} }
   function reset(){
     persistStats();themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;
     pi=Math.floor(Math.random()*pals.length);ci=0;
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
     camY=0;tCamY=-H*0.1;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
-    slowMotionActive=false;slowMotionTimer=0;scorePopTimer=0;
+    slowMotionActive=false;slowMotionTimer=0;
     status='idle';
   }
   function refreshTheme(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;}
@@ -339,8 +375,8 @@ function create(platform){
     if(destroyed)return;
     camY=lerp(camY,tCamY,0.08);if(shake>0)shake*=0.84;if(shake<0.08)shake=0;if(flashA>0)flashA-=0.025;if(flashA<0)flashA=0;if(cpt>0){cpt--;if(cpt<=0)cpText='';}
     if(slowMotionActive){slowMotionTimer--;if(slowMotionTimer<=0){slowMotionActive=false;}}
-    if(status==='playing'&&cur){var b=cur,bd=swBounds(b.w);b.x+=b.speed*b.dir;if(b.x<=bd.min){b.x=bd.min;b.dir=1;}else if(b.x+b.w>=bd.max){b.x=bd.max-b.w;b.dir=-1;}}
-    if(status==='dropping'&&cur){dp+=0.13;if(dp>=1){dp=1;cur.y=dtY;placeBlock();if(status!=='gameover'&&status!=='levelcomplete')spawnBlock();}else{var sy=topOfStack().y+BH()+2;cur.y=sy+(dtY-sy)*eOutBounce(dp);}}
+    if(status==='playing'&&cur){var b=cur,bd=swBounds(b.w);var effectiveSpeed=slowMotionActive?b.baseSpeed*0.3:b.baseSpeed;b.x+=effectiveSpeed*b.dir;if(b.x<=bd.min){b.x=bd.min;b.dir=1;}else if(b.x+b.w>=bd.max){b.x=bd.max-b.w;b.dir=-1;}}
+    if(status==='dropping'&&cur){dp+=0.13;if(dp>=1){dp=1;cur.y=dtY;placeBlock();if(status!=='gameover'&&status!=='levelcomplete')spawnBlock();}else{var sy=topOfStack().y-HOVER();cur.y=sy+(dtY-sy)*eOutBounce(dp);}}
     for(var i=pts.length-1;i>=0;i--){var p=pts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=p.decay;if(p.life<=0)pts.splice(i,1);}
     for(var j=fps.length-1;j>=0;j--){var f=fps[j];f.vy+=0.45;f.y+=f.vy;f.x+=f.vx;f.rot+=f.rs;if(f.y>H+250)fps.splice(j,1);}
   }
@@ -352,8 +388,6 @@ function create(platform){
 
   function drawBg(){
     var bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,bgColors[0]);bg.addColorStop(0.5,bgColors[1]);bg.addColorStop(1,bgColors[2]);ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-      // DEBUG: draw a visible rectangle to confirm rendering works
-      
     ctx.strokeStyle='rgba(0,0,0,0.03)';ctx.lineWidth=0.5;for(var x=40;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(var y=40;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   }
 
@@ -400,8 +434,15 @@ function create(platform){
 
     // 模式标签
     if(mode==='level'){
-      var lv=LEVELS.find(function(l){return l.id===levelId;});
-      if(lv)dText('🎯 第'+lv.id+'关 · '+lv.name,W/2,sY+28,13,'rgba(0,0,0,0.5)','center');
+      if(curLvData){
+        var label='🎯 第'+curLvData.id+'关 · '+curLvData.name;
+        // 31关以后，加速真正发生后才显示倍率
+        if(levelId>=31&&score>=5){
+          var accelNow=Math.min(1+Math.floor(score/5)*0.05,1.6);
+          if(accelNow>1)label+=' ⚡'+accelNow.toFixed(2)+'x';
+        }
+        dText(label,W/2,sY+28,13,'rgba(0,0,0,0.5)','center');
+      }
     }else if(mode==='daily'){
       dText('📅 今日挑战',W/2,sY+28,13,'rgba(200,140,0,0.8)','center');
     }
@@ -423,149 +464,74 @@ function create(platform){
       dText(score+'/'+levelTarget,W/2,barY+14,11,prog>=1?'#4ade80':'rgba(0,0,0,0.5)','center');
     }
 
-    // 道具计数
+    // 道具计数 / 慢动作提示（互斥，慢动作激活时优先显示）
     if(status==='playing'){
-      var totalT=stats.tools.slow+stats.tools.widen+stats.tools.reverse;
-      if(totalT>0){
-        var ty2=H-35;
-        ctx.font='900 14px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
-        ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillText('🐢×'+stats.tools.slow+'  📏×'+stats.tools.widen+'  🔄×'+stats.tools.reverse,W/2,ty2);
+      if(slowMotionActive){
+        dText('🐢 慢动作 ('+Math.ceil(slowMotionTimer/60)+'s)',W/2,H-35,13,'rgba(0,150,220,0.9)','center','rgba(0,150,220,0.3)',10);
       }else{
-        ctx.font='900 12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
-        ctx.fillStyle='rgba(255,50,50,0.8)';var refills=3-(stats.shareRefills||0);ctx.fillText('⚠️ 道具用完 · 分享得3个(剩'+refills+'次)',W/2,H-35);
+        var totalT=stats.tools.slow+stats.tools.widen+stats.tools.reverse;
+        if(totalT>0){
+          ctx.font='900 14px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
+          ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillText('🐢×'+stats.tools.slow+'  📏×'+stats.tools.widen+'  🔄×'+stats.tools.reverse,W/2,H-35);
+        }else{
+          ctx.font='900 12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
+          ctx.fillStyle='rgba(255,50,50,0.8)';var refills=3-(stats.shareRefills||0);ctx.fillText('⚠️ 道具用完 · 分享得3个(剩'+refills+'次)',W/2,H-35);
+        }
       }
-    }
-    if(slowMotionActive){
-      var sma=0.6+Math.sin(Date.now()/300)*0.3;
-      dText('🐢 慢动作',W/2,H-35,13,'rgba(0,150,220,0.8)','center','rgba(0,150,220,0.2)',8);
     }
 
     // Idle
     if(status==='idle'){
       var p2=Math.sin(Date.now()/800)*0.3+0.5;
-      ctx.fillStyle='rgba(0,0,0,'+(p2*0.7)+')';ctx.font='600 18px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
+      ctx.textAlign='center';
       ctx.font='bold 22px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
       ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillText('🪜 弹弹塔',W/2,H*0.66);
       ctx.font='600 16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
       ctx.fillStyle='rgba(0,0,0,'+(p2*0.6)+')';ctx.fillText('👆 点击屏幕开始',W/2,H*0.72);
-      ctx.fillStyle='rgba(0,0,0,0.3)';ctx.font='12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
-      ctx.fillStyle='rgba(0,0,0,0.25)';ctx.font='12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.fillText('⚠️ 色块大小随机 · 对准了再点',W/2,H*0.72+26);
-      if(mode==='level'&&levelTarget>0){var lv2=LEVELS.find(function(l){return l.id===levelId;});if(lv2){
-        ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText('🎯 目标: '+lv2.target+' 层 — '+lv2.desc,W/2,H*0.72+44);
-      }}
-      if(stats.dailyStreak>=2){ctx.fillStyle='rgba(230,120,0,0.7)';ctx.font='11px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.fillText('🔥 连续签到 '+stats.dailyStreak+' 天',W/2,H*0.72+62);}
+      ctx.font='12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';
+      ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillText('⚠️ 色块大小随机 · 对准了再点',W/2,H*0.72+26);
+      if(mode==='level'&&levelTarget>0&&curLvData){
+        ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillText('🎯 目标: '+curLvData.target+' 层 — '+curLvData.desc,W/2,H*0.72+44);
+      }
+      if(stats.dailyStreak>=2){ctx.font='11px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.fillStyle='rgba(230,120,0,0.7)';ctx.fillText('🔥 连续签到 '+stats.dailyStreak+' 天',W/2,H*0.72+62);}
     }
 
     // Combo pop
     if(cpt>0&&cpText){var pa=cpt>30?1:cpt/30,ps2=1+(55-cpt)*0.008;ctx.save();ctx.globalAlpha=pa;ctx.translate(W/2,H*0.30);ctx.scale(ps2,ps2);dText(cpText,0,0,44,cpColor,'center',cpColor,35);ctx.restore();}
 
-    // ====== 通关面板 ======
-    if(status==='levelcomplete'&&!useNativeUI){
-      // 暗色遮罩+模糊感
-      ctx.fillStyle='rgba(255,255,255,0.65)';ctx.fillRect(0,0,W,H);
-      // 装饰圆
-      ctx.fillStyle='rgba(255,180,0,0.1)';ctx.beginPath();ctx.arc(W*0.3,H*0.3,W*0.5,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(W*0.7,H*0.7,W*0.35,0,Math.PI*2);ctx.fill();
-
-      var pw=Math.min(W*0.82,320),ph=280,px=W/2-pw/2,py=H/2-ph/2-15;
-      // 玻璃面板
-      var panelGrad=ctx.createLinearGradient(px,py,px,py+ph);
-      panelGrad.addColorStop(0,'rgba(22,22,60,0.95)');panelGrad.addColorStop(1,'rgba(16,16,40,0.97)');
-      rrect(px,py,pw,ph,22,panelGrad);
-      ctx.strokeStyle='rgba(255,215,0,0.3)';ctx.lineWidth=2;ctx.stroke();
-      // 内发光
-      ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
-      ctx.strokeStyle="rgba(255,255,255,0.04)";ctx.lineWidth=1;rrect(px+2,py+2,pw-4,ph-4-2,20,"transparent");ctx.stroke();
-
-      dText(mode==='level'?'🎉 通关!':'🎉 挑战完成!',W/2,py+32,26,'#e67e00','center','rgba(230,126,0,0.2)',10);
-
-      // 星星 - 带动效
-      var starY=py+74,starGap=46;
-      for(var si=0;si<3;si++){
-        var starAlpha=si<starsEarned?1:0.15;
-        var starScale=si<starsEarned?1.1+Math.sin(Date.now()/400+si)*0.08:1;
-        ctx.globalAlpha=starAlpha;ctx.font=(38*starScale)+'px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
-        ctx.fillText('⭐',W/2-(1-si)*starGap,starY);
-      }
-      ctx.globalAlpha=1;
-
-      dText(score+' 层 · '+maxCombo+' 连击',W/2,starY+48,15,'rgba(0,0,0,0.6)','center');
-      if(starsEarned>=3){dText('🌟 完美通关! 道具+1',W/2,starY+64,13,'#ffd700','center');}
-      var pct=levelId<=3?50:levelId<=6?30:levelId<=10?15:levelId<=15?8:levelId<=20?3:levelId<=25?1:0.5;
-      dText('🏅 你超过了 '+pct+'% 的玩家!',W/2,starY+66,13,'#ff6b6b','center');
-      if(wasNewBest)dText('🏆 新纪录!',W/2,starY+72,15,'#ff6b6b','center','rgba(255,107,107,0.4)',12);
-      if(mode==='level'){var nl=LEVELS.find(function(l){return l.id===levelId+1;});if(nl)dText('下一关: '+nl.name+' → '+nl.target+'层',W/2,starY+(wasNewBest?96:86),12,'rgba(0,0,0,0.35)','center');}
-
-      var bw=160,bh=42,bx=W/2-bw/2,by=py+ph-58;
-      var bgrad=ctx.createLinearGradient(bx,by,bx,by+bh);bgrad.addColorStop(0,'#667eea');bgrad.addColorStop(1,'#764ba2');rrect(bx,by,bw,bh,bh/2,bgrad);
-      dText(mode==='level'?'▶ 继续闯关':'返回',W/2,by+bh/2,16,'#ffffff','center');
-      var pulse3=Math.sin(Date.now()/600)*0.15+0.85;
-      ctx.strokeStyle='rgba(0,0,0,'+(pulse3*0.2)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(bx+bw/2,by+bh/2,bh/2+5,0,Math.PI*2);ctx.stroke();
-    }
-
-    // ====== 失败面板 ======
-    if(status==='gameover'&&!useNativeUI){
-      ctx.fillStyle='rgba(255,255,255,0.6)';ctx.fillRect(0,0,W,H);
-      ctx.fillStyle='rgba(255,107,107,0.08)';ctx.beginPath();ctx.arc(W*0.25,H*0.25,W*0.45,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='rgba(255,180,0,0.08)';ctx.beginPath();ctx.arc(W*0.75,H*0.75,W*0.35,0,Math.PI*2);ctx.fill();
-
-      var pw2=Math.min(W*0.8,310),ph2=mode==='level'?220:210,px2=W/2-pw2/2,py2=H/2-ph2/2-15;
-      var pg2=ctx.createLinearGradient(px2,py2,px2,py2+ph2);
-      pg2.addColorStop(0,'rgba(255,255,255,0.95)');pg2.addColorStop(1,'rgba(250,248,245,0.97)');
-      rrect(px2,py2,pw2,ph2,22,pg2);
-      ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.stroke();ctx.strokeStyle='rgba(0,0,0,0.1)';ctx.lineWidth=1;ctx.stroke();
-
-      if(mode==='level'){
-        dText('😢 挑战失败',W/2,py2+30,22,'#333','center');
-        var remain=levelTarget-score;
-        if(remain>0&&remain<=10){
-          dText('只差 '+remain+' 层就过关了! 💪',W/2,py2+56,16,'#ff6b35','center','rgba(255,107,53,0.3)',8);
-        }else{
-          dText('目标 '+levelTarget+' 层 · 到达 '+score+' 层',W/2,py2+56,13,'rgba(0,0,0,0.4)','center');
-        }
-      }else if(mode==='daily'){
-        dText('😢 挑战失败',W/2,py2+30,22,'#333','center');
-        var rem=levelTarget-score;
-        if(rem>0&&rem<=10)dText('只差 '+rem+' 层! 明天再来~',W/2,py2+56,16,'#ff6b35','center','rgba(255,107,53,0.3)',8);
-        else dText('目标 '+levelTarget+' 层 · 到达 '+score+' 层',W/2,py2+56,13,'rgba(0,0,0,0.4)','center');
-      }else{
-        dText('🎯 游戏结束',W/2,py2+30,22,'#ffffff','center');
-      }
-
-      // 分数 - 金色渐变
-      var sg2=ctx.createLinearGradient(W/2-40,py2+90,W/2+40,py2+90);
-      sg2.addColorStop(0,'#ffffff');sg2.addColorStop(1,'#ffd700');
-      dText(String(score),W/2,py2+102,52,sg2,'center','rgba(255,215,0,0.4)',25);
-
-      if(wasNewBest)dText('🏆 新纪录!',W/2,py2+130,15,'#ff6b6b','center','rgba(255,107,107,0.4)',12);
-      dText((maxCombo>0?'最高 '+maxCombo+' 连击 · ':'')+stack.length+' 层',W/2,py2+(wasNewBest?148:138),11,'rgba(0,0,0,0.4)','center');
-
-      var bw2=160,bh2=42,bx2=W/2-bw2/2,by2=py2+ph2-58;
-      var bgrad2=ctx.createLinearGradient(bx2,by2,bx2,by2+bh2);bgrad2.addColorStop(0,'#667eea');bgrad2.addColorStop(1,'#764ba2');rrect(bx2,by2,bw2,bh2,bh2/2,bgrad2);
-      dText('🔄 再来一局',W/2,by2+bh2/2,16,'#ffffff','center');
-      var p3=Math.sin(Date.now()/700)*0.15+0.85;
-      ctx.strokeStyle='rgba(0,0,0,'+(p3*0.3)+')';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(bx2+bw2/2,by2+bh2/2,bh2/2+5,0,Math.PI*2);ctx.stroke();
-    }
   }
   function renderShareCard(cc,cw,ch){
     var bg2=cc.createLinearGradient(0,0,0,ch);bg2.addColorStop(0,'#1a1a3e');bg2.addColorStop(0.4,'#2a1a4e');bg2.addColorStop(1,'#1a1a3e');cc.fillStyle=bg2;cc.fillRect(0,0,cw,ch);
     cc.fillStyle='rgba(255,255,255,0.03)';cc.beginPath();cc.arc(cw*0.2,ch*0.3,cw*0.4,0,Math.PI*2);cc.fill();cc.beginPath();cc.arc(cw*0.8,ch*0.7,cw*0.3,0,Math.PI*2);cc.fill();
     cc.font='bold 28px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillStyle='#ffffff';cc.fillText('🪜 弹弹塔',cw/2,ch*0.18);
     cc.font='900 72px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.shadowColor='rgba(255,215,0,0.5)';cc.shadowBlur=30;cc.fillStyle='#ffd700';cc.fillText(String(score),cw/2,ch*0.45);cc.shadowColor='transparent';cc.shadowBlur=0;
-    if(mode==='level'){var lv3=LEVELS.find(function(l){return l.id===levelId;});if(lv3)cc.fillText('第'+lv3.id+'关 · '+lv3.name+' · '+starsEarned+'星',cw/2,ch*0.55);}
+    if(mode==='level'&&curLvData)cc.fillText('第'+curLvData.id+'关 · '+curLvData.name+' · '+starsEarned+'星',cw/2,ch*0.55);
     cc.font='16px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';cc.fillStyle='rgba(255,255,255,0.5)';cc.fillText('来挑战我吧! 微信搜「弹弹塔」',cw/2,ch*0.85);
   }
 
-  function loop(){if(destroyed)return;lastFrameTime=Date.now();update();render();if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=setTimeout(function(){if(Date.now()-lastFrameTime>1500&&!destroyed){console.warn('RAF stalled, restarting');rafId=raf(loop);}},2000);rafId=raf(loop);}
+  var paused=false,bgmWasPlaying=false;
+  function loop(){if(destroyed||paused)return;lastFrameTime=Date.now();update();render();rafId=raf(loop);}
+  function onVisibility(){
+    if(document.hidden){
+      paused=true;bgmWasPlaying=bgmPlaying;bgmStop();
+
+    }else{
+      paused=false;
+      if(bgmWasPlaying)bgmStart();
+      rafId=raf(loop);
+    }
+  }
   function init(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;pi=Math.floor(Math.random()*pals.length);ci=0;bestScore=loadBest();
-  // Draw first frame immediately (don't wait for RAF)
+  document.addEventListener('visibilitychange',onVisibility);
   try{render();}catch(e){}
   loop();}
-  function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();else if(status==='gameover'||status==='levelcomplete')reset();}
-  function destroy(){destroyed=true;persistStats();if(rafWatchdog)clearTimeout(rafWatchdog);rafWatchdog=null;rafId=null;}
+  function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();}
+  function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);rafId=null;}
+
+  function resizeViewport(w,h){W=w;H=h;}
 
   return{
-    init:init,handleTap:handleTap,reset:reset,revive:revive,destroy:destroy,setMode:setMode,
+    init:init,handleTap:handleTap,reset:reset,revive:revive,destroy:destroy,setMode:setMode,resizeViewport:resizeViewport,
     useTool:useTool,addTool:addTool,getToolCount:getToolCount,
     renderShareCard:renderShareCard,refreshTheme:refreshTheme,unlockSkin:unlockSkin,
     getStatus:function(){return status;},getScore:function(){return score;},getBestScore:function(){return bestScore;},getMode:function(){return mode;},
@@ -579,5 +545,5 @@ function create(platform){
   };
 }
 
-module.exports={create:create,THEMES:THEMES,ACHIEVEMENTS:ACHIEVEMENTS,LEVELS:LEVELS};if(typeof module!=='undefined')module.exports=global.BounceTower;
+global.BounceTower={create:create,THEMES:THEMES,ACHIEVEMENTS:ACHIEVEMENTS,LEVELS:LEVELS};if(typeof module!=='undefined')module.exports=global.BounceTower;
 })(typeof window!=='undefined'?window:(typeof global!=='undefined'?global:this));

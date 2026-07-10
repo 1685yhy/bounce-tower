@@ -198,6 +198,7 @@ function goHome(){
   document.getElementById('tools').classList.add('hidden');
   document.getElementById('home').classList.remove('hidden');
   game.bgmStop();
+  game.reset();  // 清除 gameover/levelcomplete 状态，回到 idle，canvas 干净
 }
 
 function updateTools(){
