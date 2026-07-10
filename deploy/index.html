@@ -29,12 +29,11 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 /* 操作按钮区 */
 .home-actions{display:flex;gap:10px;margin:12px 16px;flex-shrink:0}
-.btn-start{flex:1;padding:14px 0;border-radius:50px;font-size:18px;font-weight:800;color:#fff;border:none;background:linear-gradient(135deg,#ff6b6b,#ff8e53);box-shadow:0 6px 24px rgba(255,107,107,0.35);cursor:pointer}
+.btn-start{flex:1;padding:14px 0;border-radius:50px;font-size:18px;font-weight:800;color:#fff;border:none;background:linear-gradient(135deg,#ff6b6b,#ff8e53);box-shadow:0 6px 24px rgba(255,107,107,0.35);cursor:pointer;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
 .btn-start:active{transform:scale(0.96)}
-.btn-daily{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0}
-.btn-daily:active{transform:scale(0.9)}
-.btn-icon{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0}
-.btn-icon:active{transform:scale(0.9)}
+.btn-daily{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
+.btn-icon{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
+.btn-daily:active,.btn-icon:active{transform:scale(0.9)}
 
 /* 关卡格 */
 .grid-wrap{flex:1;overflow-y:auto;padding:0 10px 8px}
@@ -52,13 +51,13 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #hud.hidden{display:none}
 #hud-left{font-size:12px;color:rgba(0,0,0,0.4);max-width:45%}
 #hud-right{display:flex;gap:8px}
-.hud-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.hud-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform .1s cubic-bezier(0.34,1.56,0.64,1)}
 .hud-btn:active{transform:scale(0.88)}
 
 /* ===== 工具栏 ===== */
 #tools{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:10px}
 #tools.hidden{display:none}
-.tool-btn{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,0.92);border:2px solid #e8e0d0;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.08);line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.tool-btn{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,0.92);border:2px solid #e8e0d0;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.08);line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1),border-color .12s}
 .tool-btn:active{transform:scale(0.88);border-color:#ff6b6b}
 .tool-btn:disabled{opacity:0.28}
 .tool-icon{font-size:20px;line-height:1}
@@ -80,11 +79,12 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .card-stat-lbl{font-size:9px;color:#bbb;margin-top:1px}
 .card-badge{font-size:11px;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);border-radius:20px;padding:3px 10px;display:inline-block;margin:4px 0 10px}
 .btn-row{display:flex;gap:8px;margin-top:10px}
-.btn-main{flex:1;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+.btn-main{flex:1;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
 .btn-main:active{transform:scale(0.95)}
-.btn-sec{flex:1;padding:13px 0;border-radius:50px;font-size:14px;font-weight:600;border:1px solid #e8e0d0;cursor:pointer;background:#fafaf7;color:#666}
+.btn-sec{flex:1;padding:13px 0;border-radius:50px;font-size:14px;font-weight:600;border:1px solid #e8e0d0;cursor:pointer;background:#fafaf7;color:#666;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
 .btn-sec:active{transform:scale(0.95)}
 .btn-ghost{width:100%;padding:10px 0;border-radius:50px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#bbb;margin-top:4px}
+.btn-ghost{transition:opacity .2s}
 .btn-ghost:active{opacity:0.6}
 
 /* 暂停面板特殊 */
@@ -101,12 +101,12 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .daily-desc{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:16px}
 .daily-target{font-size:48px;font-weight:900;color:#ffd700;line-height:1}
 .daily-target-lbl{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:16px}
-.btn-daily-start{width:100%;padding:14px 0;border-radius:50px;font-size:16px;font-weight:800;border:none;cursor:pointer;background:linear-gradient(135deg,#ffd700,#ff8e53);color:#fff;margin-bottom:8px}
+.btn-daily-start{width:100%;padding:14px 0;border-radius:50px;font-size:16px;font-weight:800;border:none;cursor:pointer;background:linear-gradient(135deg,#ffd700,#ff8e53);color:#fff;margin-bottom:8px;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1)}
 .btn-daily-start:active{transform:scale(0.95)}
 
 /* 主题选择 */
 .theme-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
-.theme-item{width:76px;height:68px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:2px solid transparent;font-size:10px;font-weight:700;color:#555;background:#f5f2ee}
+.theme-item{width:76px;height:68px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:2px solid transparent;font-size:10px;font-weight:700;color:#555;background:#f5f2ee;transition:transform .12s cubic-bezier(0.34,1.56,0.64,1),border-color .2s}
 .theme-item:active{transform:scale(0.92)}
 .theme-item.active{border-color:#ff6b6b}
 .theme-dot{width:28px;height:14px;border-radius:4px}
@@ -122,12 +122,12 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .achieve-check{font-size:18px;flex-shrink:0}
 
 /* 新手提示覆盖 */
-#tutorial{position:absolute;top:0;left:0;width:100%;height:100%;z-index:20;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+#tutorial{position:absolute;top:0;left:0;width:100%;height:100%;z-index:20;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 #tutorial.hidden{display:none}
-.tut-bubble{background:#fff;border-radius:20px;padding:20px 24px;max-width:300px;text-align:center;margin-bottom:24px}
+.tut-bubble{background:#fff;border-radius:20px;padding:20px 24px;max-width:300px;text-align:center;margin-bottom:16px}
 .tut-bubble h3{font-size:18px;font-weight:900;color:#e8734a;margin-bottom:8px}
-.tut-bubble p{font-size:14px;color:#666;line-height:1.6}
-.tut-arrow{font-size:40px;animation:bounce 1s ease-in-out infinite}
+.tut-bubble p{font-size:13px;color:#666;line-height:1.6}
+.tut-arrow{font-size:32px;animation:bounce 1s ease-in-out infinite;margin-bottom:4px}
 .tut-skip{color:rgba(255,255,255,0.6);font-size:13px;margin-top:16px;cursor:pointer}
 </style>
 </head>
@@ -237,11 +237,11 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
     <h3>👆 怎么玩？</h3>
     <p>点击屏幕，让滑动的方块落下<br>对准下面的砖块，完美落下会变宽<br>堆够目标层数就算通关！</p>
   </div>
-  <div class="tut-arrow">👇</div>
+  <div class="tut-arrow">👆</div>
   <div class="tut-skip" id="tutSkip">知道了，开始玩 →</div>
 </div>
 
-<script src="game-engine.js?v=6"></script>
+<script src="game-engine.js?v=7"></script>
 <script>
 (function(){
 'use strict';
@@ -263,14 +263,25 @@ function vib(type){
   else if(type==='heavy')navigator.vibrate([30,20,30]);
 }
 
-// 存储
+// 存储（QuotaExceeded 时通知用户）
 function L(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function S(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function S(k,v){
+  try{localStorage.setItem(k,JSON.stringify(v));}
+  catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22)showToast('⚠️ 存储空间不足，进度可能无法保存');
+  }
+}
 
 // 工具函数
 function hide(id){document.getElementById(id).classList.add('hidden');}
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function el(id){return document.getElementById(id);}
+// 读取 CSS safe-area 高度（刘海屏适配 canvas 内 UI）
+var safeTop=44;
+(function(){
+  var d=document.createElement('div');d.style.cssText='position:fixed;top:env(safe-area-inset-top,0);height:0;pointer-events:none';
+  document.body.appendChild(d);safeTop=Math.max(44,parseInt(getComputedStyle(d).top)||44);document.body.removeChild(d);
+})();
 
 // 全局状态
 var TOOLS_PER_ROUND={slow:1,widen:1,reverse:1};
@@ -285,6 +296,7 @@ var game=BounceTower.create({
   requestAnimationFrame:function(fn){return requestAnimationFrame(fn);},
   playBeep:beep,
   vibrate:vib,
+  safeTop:parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||safeTop,
   onGameOver:function(sc,cb,ly,nb,m,li,lt){showResultPanel(false,sc,cb,ly,li,lt);},
   onNewBest:function(){},
   onAchievement:function(a){showToast(a.icon+' 成就解锁：'+a.name);},
@@ -294,7 +306,7 @@ var game=BounceTower.create({
     if(r.stars>prev){stars[r.levelId]=r.stars;S('stars',stars);}
     S('lvl',Math.min(50,r.levelId+1));
     buildGrid();
-    showResultPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars);
+    showResultPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars,r.wasNewBest);
   },
   onUseTool:function(){updateTools();},
   loadStats:function(){return L('stats',{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0});},
@@ -380,10 +392,13 @@ el('btnPause').addEventListener('click',function(){au();pauseGame();});
 el('btnResume').addEventListener('click',function(){au();resumeGame();});
 el('btnQuit').addEventListener('click',function(){au();resumeGame();goHome();});
 
-// ===== 工具栏 =====
-el('btnSlow').addEventListener('click',function(){au();game.useTool('slow');updateTools();});
-el('btnWiden').addEventListener('click',function(){au();game.useTool('widen');updateTools();});
-el('btnReverse').addEventListener('click',function(){au();game.useTool('reverse');updateTools();});
+// ===== 工具栏（带 stopPropagation 防止穿透 canvas）=====
+el('btnSlow').addEventListener('touchstart',function(e){e.stopPropagation();});
+el('btnSlow').addEventListener('click',function(e){e.stopPropagation();au();game.useTool('slow');updateTools();});
+el('btnWiden').addEventListener('touchstart',function(e){e.stopPropagation();});
+el('btnWiden').addEventListener('click',function(e){e.stopPropagation();au();game.useTool('widen');updateTools();});
+el('btnReverse').addEventListener('touchstart',function(e){e.stopPropagation();});
+el('btnReverse').addEventListener('click',function(e){e.stopPropagation();au();game.useTool('reverse');updateTools();});
 
 // ===== 每日挑战 =====
 el('btnDailyStart').addEventListener('click',function(){
@@ -461,12 +476,13 @@ function goHome(){
 }
 
 // ===== 结果面板 =====
-function showResultPanel(win,score,cb,ly,levelId,starsOrTarget){
+function showResultPanel(win,score,cb,ly,levelId,starsOrTarget,wasNewBest){
   var stars=win?starsOrTarget:0;
   hide('hud');hide('tools');
   show('panel');
 
-  el('ptitle').textContent=win?'🎉 通关!':'😢 挑战失败';
+  // 首通特别庆祝
+  el('ptitle').textContent=win?(wasNewBest?'🎉 新纪录！':'🎉 通关!'):'😢 挑战失败';
   el('pscore').textContent=score;
   el('pstars').textContent=win?('⭐'.repeat(stars)+'☆'.repeat(Math.max(0,3-stars))):'';
 
