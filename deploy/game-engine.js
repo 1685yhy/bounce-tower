@@ -112,6 +112,7 @@ function create(platform){
   var saveStats=platform.saveStats||function(){};
   var getTheme=platform.getTheme||function(){return'default';};
   var useNativeUI=platform.useNativeUI||false;
+  var vibrate=platform.vibrate||function(){};
 
   function BH(){return Math.max(22,W*0.075);}
   function IBW(){
@@ -265,8 +266,8 @@ function create(platform){
       if(combo>=3){var bonus=Math.min(combo*1.5,20);pb.w=Math.min(pb.w+bonus,IBW()*1.1);pb.x=Math.max(1,pb.x-(pb.w-oW)/2);}
       spawnPts(oL+oW/2,t.y+BH()/2,18,b.color,1.2);flashA=0.25;flashC='#ffd700';
       if(combo>=5)spawnPts(oL+oW/2,t.y+BH()/2,10,'#ffffff',1.5);
-      if(combo>=3){var msgs=combo>=20?['👑 神之手!','🌟 无敌!','💎 传说!']:combo>=10?['🔥 炸裂!','⚡ 疯狂!','🎯 精准!']:combo>=5?['✨ 连击!','💪 厉害!','👏 漂亮!']:['👍 不错!','✅ 完美!','💯 满分!'];cpText=msgs[Math.floor(Math.random()*msgs.length)]+' x'+combo;cpColor=b.color;cpt=55;if(platform.vibrate)platform.vibrate('light');sfxCombo();if(platform.vibrate)platform.vibrate('heavy');}else{sfxPerfect();if(platform.vibrate&&combo===0)platform.vibrate('light');}
-    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,t.y+BH()/2,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);if(platform.vibrate)platform.vibrate('medium');}}}
+      if(combo>=3){var msgs=combo>=20?['👑 神之手!','🌟 无敌!','💎 传说!']:combo>=10?['🔥 炸裂!','⚡ 疯狂!','🎯 精准!']:combo>=5?['✨ 连击!','💪 厉害!','👏 漂亮!']:['👍 不错!','✅ 完美!','💯 满分!'];cpText=msgs[Math.floor(Math.random()*msgs.length)]+' x'+combo;cpColor=b.color;cpt=55;vibrate('light');sfxCombo();vibrate('heavy');}else{sfxPerfect();if(combo===0)vibrate('light');}
+    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,t.y+BH()/2,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);vibrate('medium');}}}
     tCamY=Math.max(0,t.y-H*0.35);cur=null;dp=0;
 
     if(score>=levelTarget){
@@ -432,52 +433,31 @@ function create(platform){
     scoreGrad.addColorStop(0,'#ffffff');scoreGrad.addColorStop(1,'#ffd700');
     dText(String(score),W/2,sY,56,scoreGrad,'center','rgba(255,107,107,0.3)',20);
 
-    // 模式标签
+    // 模式标签 + 慢动作倒计时
     if(mode==='level'){
       if(curLvData){
-        var label='🎯 第'+curLvData.id+'关 · '+curLvData.name;
-        // 31关以后，加速真正发生后才显示倍率
-        if(levelId>=31&&score>=5){
-          var accelNow=Math.min(1+Math.floor(score/5)*0.05,1.6);
-          if(accelNow>1)label+=' ⚡'+accelNow.toFixed(2)+'x';
-        }
-        dText(label,W/2,sY+28,13,'rgba(0,0,0,0.5)','center');
+        var label='第'+curLvData.id+'关 · '+curLvData.name;
+        if(slowMotionActive)label='🐢 慢动作 '+Math.ceil(slowMotionTimer/60)+'s · '+label;
+        if(levelId>=31&&score>=5){var accelNow=Math.min(1+Math.floor(score/5)*0.05,1.6);if(accelNow>1)label+=' ⚡'+accelNow.toFixed(1)+'x';}
+        dText(label,W/2,sY+32,12,'rgba(0,0,0,0.45)','center');
       }
     }else if(mode==='daily'){
-      dText('📅 今日挑战',W/2,sY+28,13,'rgba(200,140,0,0.8)','center');
+      var dlabel=slowMotionActive?'🐢 慢动作 '+Math.ceil(slowMotionTimer/60)+'s · 今日挑战':'📅 今日挑战';
+      dText(dlabel,W/2,sY+32,12,'rgba(200,140,0,0.8)','center');
     }
 
     if(combo>=2&&status!=='gameover'&&status!=='levelcomplete'){
-      dText('🔥 '+combo+'x 连击',W/2,sY+46,15,'#e67e00','center','rgba(230,126,0,0.3)',12);
+      dText('🔥 '+combo+'x 连击',W/2,sY+50,14,'#e67e00','center','rgba(230,126,0,0.3)',10);
     }
 
-    // 进度条 - 带发光
+    // 进度条
     if(levelTarget>0&&status!=='idle'&&status!=='levelcomplete'&&status!=='gameover'){
-      var barW=Math.min(W*0.64,240),barH=6,barX=W/2-barW/2,barY=sY+72,prog=Math.min(1,score/levelTarget);
-      // 背景
-      ctx.fillStyle='rgba(0,0,0,0.06)';rrect(barX,barY,barW,barH,3,'rgba(0,0,0,0.06)');
-      // 进度
+      var barW=Math.min(W*0.60,220),barH=6,barX=W/2-barW/2,barY=sY+68,prog=Math.min(1,score/levelTarget);
+      ctx.fillStyle='rgba(0,0,0,0.08)';rrect(barX,barY,barW,barH,3,'rgba(0,0,0,0.08)');
       var barC=prog>=1?'#4ade80':prog>=0.6?'#ffd700':prog>=0.3?'#f97316':'#ef4444';
       if(prog>0){rrect(barX,barY,Math.max(barW*prog,barH),barH,3,barC);}
-      // 发光
       if(prog>=0.8&&prog<1){ctx.shadowColor=barC;ctx.shadowBlur=8;ctx.fillStyle=barC;ctx.fillRect(barX+barW*prog-2,barY-1,4,barH+2);ctx.shadowBlur=0;}
-      dText(score+'/'+levelTarget,W/2,barY+14,11,prog>=1?'#4ade80':'rgba(0,0,0,0.5)','center');
-    }
-
-    // 道具计数 / 慢动作提示（互斥，慢动作激活时优先显示）
-    if(status==='playing'){
-      if(slowMotionActive){
-        dText('🐢 慢动作 ('+Math.ceil(slowMotionTimer/60)+'s)',W/2,H-35,13,'rgba(0,150,220,0.9)','center','rgba(0,150,220,0.3)',10);
-      }else{
-        var totalT=stats.tools.slow+stats.tools.widen+stats.tools.reverse;
-        if(totalT>0){
-          ctx.font='900 14px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
-          ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillText('🐢×'+stats.tools.slow+'  📏×'+stats.tools.widen+'  🔄×'+stats.tools.reverse,W/2,H-35);
-        }else{
-          ctx.font='900 12px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign='center';
-          ctx.fillStyle='rgba(255,50,50,0.8)';var refills=3-(stats.shareRefills||0);ctx.fillText('⚠️ 道具用完 · 分享得3个(剩'+refills+'次)',W/2,H-35);
-        }
-      }
+      dText(score+'/'+levelTarget,W/2,barY+14,11,prog>=1?'#4ade80':'rgba(0,0,0,0.45)','center');
     }
 
     // Idle
@@ -511,15 +491,11 @@ function create(platform){
 
   var paused=false,bgmWasPlaying=false;
   function loop(){if(destroyed||paused)return;lastFrameTime=Date.now();update();render();rafId=raf(loop);}
+  function pauseEngine(){if(paused)return;paused=true;bgmWasPlaying=bgmPlaying;bgmStop();}
+  function resumeEngine(){if(!paused)return;paused=false;if(bgmWasPlaying)bgmStart();rafId=raf(loop);}
   function onVisibility(){
-    if(document.hidden){
-      paused=true;bgmWasPlaying=bgmPlaying;bgmStop();
-
-    }else{
-      paused=false;
-      if(bgmWasPlaying)bgmStart();
-      rafId=raf(loop);
-    }
+    if(document.hidden){pauseEngine();}
+    else{resumeEngine();}
   }
   function init(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;pi=Math.floor(Math.random()*pals.length);ci=0;bestScore=loadBest();
   document.addEventListener('visibilitychange',onVisibility);
@@ -532,6 +508,7 @@ function create(platform){
 
   return{
     init:init,handleTap:handleTap,reset:reset,revive:revive,destroy:destroy,setMode:setMode,resizeViewport:resizeViewport,
+    pauseEngine:pauseEngine,resumeEngine:resumeEngine,isPaused:function(){return paused;},
     useTool:useTool,addTool:addTool,getToolCount:getToolCount,
     renderShareCard:renderShareCard,refreshTheme:refreshTheme,unlockSkin:unlockSkin,
     getStatus:function(){return status;},getScore:function(){return score;},getBestScore:function(){return bestScore;},getMode:function(){return mode;},

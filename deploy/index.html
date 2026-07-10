@@ -11,79 +11,237 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#fef9f0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}
 canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
-#home{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:#fef9f0;overflow-y:auto;
-  padding:60px 20px calc(40px + env(safe-area-inset-bottom));text-align:center}
+/* ===== 首页 ===== */
+#home{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;background:#fef9f0;overflow-y:auto;padding:env(safe-area-inset-top) 0 calc(20px + env(safe-area-inset-bottom));text-align:center;display:flex;flex-direction:column}
 #home.hidden{display:none}
-#home .logo{font-size:52px;animation:bounce 2s ease-in-out infinite}
-#home h1{font-size:32px;font-weight:900;color:#e8734a;margin:4px 0}
-#home .sub{font-size:14px;color:#999;margin-bottom:20px}
-#home .btn{display:inline-block;width:200px;padding:16px 0;border-radius:60px;font-size:20px;font-weight:800;color:#fff;border:none;background:linear-gradient(135deg,#ff6b6b,#ff8e53);box-shadow:0 8px 30px rgba(255,107,107,0.4);cursor:pointer}
-#home .btn:active{transform:scale(0.94)}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.home-header{padding:32px 20px 12px;flex-shrink:0}
+.home-logo{font-size:48px;animation:bounce 2s ease-in-out infinite;line-height:1.2}
+.home-title{font-size:30px;font-weight:900;color:#e8734a;margin:4px 0 2px}
+.home-sub{font-size:13px;color:#bbb;margin-bottom:0}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
-#grid{max-width:360px;margin:20px auto 0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-#grid div{width:44px;height:52px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:2px solid #f0e8dc;font-size:15px;font-weight:900;color:#555;cursor:pointer}
-#grid div:active{transform:scale(0.9)}
-#grid div.done{background:#f0fdf4;border-color:#86efac}
-#grid div.locked{opacity:0.25;cursor:default;pointer-events:none}
-#grid div small{font-size:8px;color:#b0a89a}
+/* 个人数据条 */
+.stats-bar{display:flex;justify-content:center;gap:0;margin:14px 16px;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden;flex-shrink:0}
+.stat-item{flex:1;padding:10px 4px;border-right:1px solid #f5f0e8;text-align:center}
+.stat-item:last-child{border-right:none}
+.stat-val{font-size:18px;font-weight:900;color:#e8734a;line-height:1.1}
+.stat-lbl{font-size:9px;color:#bbb;margin-top:2px}
 
-#hud{position:absolute;top:max(20px, env(safe-area-inset-top));left:0;width:100%;text-align:center;z-index:5;pointer-events:none;font-size:13px;color:rgba(0,0,0,0.5)}
+/* 操作按钮区 */
+.home-actions{display:flex;gap:10px;margin:12px 16px;flex-shrink:0}
+.btn-start{flex:1;padding:14px 0;border-radius:50px;font-size:18px;font-weight:800;color:#fff;border:none;background:linear-gradient(135deg,#ff6b6b,#ff8e53);box-shadow:0 6px 24px rgba(255,107,107,0.35);cursor:pointer}
+.btn-start:active{transform:scale(0.96)}
+.btn-daily{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0}
+.btn-daily:active{transform:scale(0.9)}
+.btn-icon{width:52px;height:52px;border-radius:50%;background:#fff;border:2px solid #f0e8dc;font-size:20px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.07);flex-shrink:0}
+.btn-icon:active{transform:scale(0.9)}
+
+/* 关卡格 */
+.grid-wrap{flex:1;overflow-y:auto;padding:0 10px 8px}
+#grid{max-width:380px;margin:0 auto;display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+#grid div{width:52px;height:58px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:2px solid #f0e8dc;font-size:15px;font-weight:900;color:#555;cursor:pointer;position:relative;transition:transform .1s}
+#grid div:active{transform:scale(0.88)}
+#grid div.done{background:#f0fdf4;border-color:#86efac;color:#22863a}
+#grid div.locked{opacity:0.22;cursor:default;pointer-events:none}
+#grid div small{font-size:8px;color:#b0a89a;line-height:1.2}
+#grid div.done small{color:#4ade80}
+.grid-section-label{width:100%;text-align:left;font-size:11px;font-weight:700;color:#ccc;padding:8px 2px 4px;letter-spacing:1px}
+
+/* ===== 游戏HUD ===== */
+#hud{position:absolute;top:max(12px,env(safe-area-inset-top));left:0;width:100%;z-index:5;pointer-events:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
 #hud.hidden{display:none}
+#hud-left{font-size:12px;color:rgba(0,0,0,0.4);max-width:45%}
+#hud-right{display:flex;gap:8px}
+.hud-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.85);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:all;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.hud-btn:active{transform:scale(0.88)}
 
-#tools{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:12px}
+/* ===== 工具栏 ===== */
+#tools{position:absolute;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:10px}
 #tools.hidden{display:none}
-#tools button{width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,0.9);border:2px solid #e8e0d0;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.06);line-height:1}
-#tools button:active{transform:scale(0.9);border-color:#ff6b6b}
-#tools button:disabled{opacity:0.3}
+.tool-btn{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,0.92);border:2px solid #e8e0d0;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.08);line-height:1.2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.tool-btn:active{transform:scale(0.88);border-color:#ff6b6b}
+.tool-btn:disabled{opacity:0.28}
+.tool-icon{font-size:20px;line-height:1}
+.tool-count{font-size:10px;color:#aaa;font-weight:600}
+.tool-btn:not(:disabled) .tool-count{color:#ff6b6b}
 
-#panel{position:absolute;top:0;left:0;width:100%;height:100%;z-index:15;background:rgba(254,249,240,0.92);display:flex;align-items:center;justify-content:center;
-  padding-bottom:env(safe-area-inset-bottom)}
-#panel.hidden{display:none}
-#panel .card{background:#fff;border-radius:24px;padding:28px 24px 20px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,0.1);width:290px}
-#panel .card h2{font-size:22px;color:#555;margin-bottom:4px}
-#panel .card .sc{font-size:52px;font-weight:900;color:#ff6b6b;line-height:1.1}
-#panel .card .stars{font-size:28px;letter-spacing:4px;margin:6px 0 2px}
-#panel .card .sub{font-size:12px;color:#999;margin:4px 0 12px}
-#panel .card button{display:block;width:100%;padding:12px 0;border-radius:50px;font-size:15px;font-weight:700;margin-bottom:8px;border:none;cursor:pointer}
-#panel .card button:last-child{margin-bottom:0}
-#panel .card button:active{transform:scale(0.95)}
-#panel .card .b1{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
-#panel .card .b2{background:#fafaf7;color:#666;border:1px solid #e8e0d0}
-#panel .card .b3{background:#fafaf7;color:#aaa;border:1px solid #ede8e0;font-size:13px;padding:10px 0}
+/* ===== 面板（通关/失败/暂停/成就/每日/主题/成就列表) ===== */
+.overlay{position:absolute;top:0;left:0;width:100%;height:100%;z-index:15;background:rgba(254,249,240,0.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px calc(20px + env(safe-area-inset-bottom))}
+.overlay.hidden{display:none}
+.card{background:#fff;border-radius:24px;padding:26px 22px 20px;text-align:center;box-shadow:0 14px 50px rgba(0,0,0,0.1);width:100%;max-width:320px}
+.card-title{font-size:22px;color:#444;margin-bottom:6px;font-weight:800}
+.card-score{font-size:54px;font-weight:900;color:#ff6b6b;line-height:1}
+.card-stars{font-size:30px;letter-spacing:6px;margin:8px 0 4px}
+.card-sub{font-size:12px;color:#aaa;margin:4px 0 6px}
+.card-stats{display:flex;gap:0;margin:10px 0;background:#faf8f5;border-radius:12px;overflow:hidden}
+.card-stat{flex:1;padding:8px 4px;text-align:center;border-right:1px solid #f0ece4}
+.card-stat:last-child{border-right:none}
+.card-stat-val{font-size:16px;font-weight:900;color:#e8734a}
+.card-stat-lbl{font-size:9px;color:#bbb;margin-top:1px}
+.card-badge{font-size:11px;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);border-radius:20px;padding:3px 10px;display:inline-block;margin:4px 0 10px}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+.btn-main{flex:1;padding:13px 0;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
+.btn-main:active{transform:scale(0.95)}
+.btn-sec{flex:1;padding:13px 0;border-radius:50px;font-size:14px;font-weight:600;border:1px solid #e8e0d0;cursor:pointer;background:#fafaf7;color:#666}
+.btn-sec:active{transform:scale(0.95)}
+.btn-ghost{width:100%;padding:10px 0;border-radius:50px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#bbb;margin-top:4px}
+.btn-ghost:active{opacity:0.6}
+
+/* 暂停面板特殊 */
+.pause-icon{font-size:48px;margin-bottom:8px}
+
+/* 成就通知 toast */
+#toast{position:absolute;top:calc(90px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:30;background:rgba(30,30,50,0.92);color:#fff;border-radius:50px;padding:10px 20px;font-size:14px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s}
+#toast.show{opacity:1}
+
+/* 每日挑战面板 */
+.daily-card{background:linear-gradient(135deg,#1a1a3e,#2d1a5e);border-radius:24px;padding:28px 22px 22px;color:#fff;text-align:center;width:100%;max-width:320px}
+.daily-badge{font-size:11px;background:rgba(255,215,0,0.2);color:#ffd700;border-radius:20px;padding:3px 12px;display:inline-block;margin-bottom:12px}
+.daily-title{font-size:20px;font-weight:900;margin-bottom:4px}
+.daily-desc{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:16px}
+.daily-target{font-size:48px;font-weight:900;color:#ffd700;line-height:1}
+.daily-target-lbl{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:16px}
+.btn-daily-start{width:100%;padding:14px 0;border-radius:50px;font-size:16px;font-weight:800;border:none;cursor:pointer;background:linear-gradient(135deg,#ffd700,#ff8e53);color:#fff;margin-bottom:8px}
+.btn-daily-start:active{transform:scale(0.95)}
+
+/* 主题选择 */
+.theme-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.theme-item{width:76px;height:68px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:2px solid transparent;font-size:10px;font-weight:700;color:#555;background:#f5f2ee}
+.theme-item:active{transform:scale(0.92)}
+.theme-item.active{border-color:#ff6b6b}
+.theme-dot{width:28px;height:14px;border-radius:4px}
+
+/* 成就列表 */
+.achieve-list{width:100%;max-width:320px;max-height:65vh;overflow-y:auto}
+.achieve-item{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.achieve-item.locked{opacity:0.38}
+.achieve-icon{font-size:28px;flex-shrink:0}
+.achieve-info{flex:1;text-align:left}
+.achieve-name{font-size:14px;font-weight:800;color:#333}
+.achieve-desc{font-size:11px;color:#aaa;margin-top:2px}
+.achieve-check{font-size:18px;flex-shrink:0}
+
+/* 新手提示覆盖 */
+#tutorial{position:absolute;top:0;left:0;width:100%;height:100%;z-index:20;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+#tutorial.hidden{display:none}
+.tut-bubble{background:#fff;border-radius:20px;padding:20px 24px;max-width:300px;text-align:center;margin-bottom:24px}
+.tut-bubble h3{font-size:18px;font-weight:900;color:#e8734a;margin-bottom:8px}
+.tut-bubble p{font-size:14px;color:#666;line-height:1.6}
+.tut-arrow{font-size:40px;animation:bounce 1s ease-in-out infinite}
+.tut-skip{color:rgba(255,255,255,0.6);font-size:13px;margin-top:16px;cursor:pointer}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="toast"></div>
 
+<!-- 首页 -->
 <div id="home">
-  <div class="logo">🪜</div>
-  <h1>弹弹塔</h1>
-  <div class="sub">今天你堆了吗？</div>
-  <button class="btn" id="btnStart">🎮 开始游戏</button>
-  <div id="grid"></div>
-</div>
-
-<div id="hud" class="hidden"></div>
-<div id="tools" class="hidden">
-  <button id="btnSlow">🐢</button>
-  <button id="btnWiden">📏</button>
-  <button id="btnReverse">🔄</button>
-</div>
-
-<div id="panel" class="hidden">
-  <div class="card">
-    <h2 id="ptitle"></h2>
-    <div class="sc" id="pscore"></div>
-    <div class="stars" id="pstars"></div>
-    <div class="sub" id="psub"></div>
-    <button class="b1" id="pbtn1"></button>
-    <button class="b2" id="pbtn2"></button>
-    <button class="b3" id="pbtn3"></button>
+  <div class="home-header">
+    <div class="home-logo">🪜</div>
+    <div class="home-title">弹弹塔</div>
+    <div class="home-sub">今天你堆了吗？</div>
+  </div>
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-item"><div class="stat-val" id="statLv">-</div><div class="stat-lbl">最高关卡</div></div>
+    <div class="stat-item"><div class="stat-val" id="statStars">-</div><div class="stat-lbl">总星数</div></div>
+    <div class="stat-item"><div class="stat-val" id="statGames">-</div><div class="stat-lbl">总局数</div></div>
+    <div class="stat-item"><div class="stat-val" id="statCombo">-</div><div class="stat-lbl">最高连击</div></div>
+  </div>
+  <div class="home-actions">
+    <button class="btn-start" id="btnStart">🎮 开始游戏</button>
+    <button class="btn-daily" id="btnDaily" title="每日挑战">📅</button>
+    <button class="btn-icon" id="btnAchieve" title="成就">🏅</button>
+    <button class="btn-icon" id="btnTheme" title="主题">🎨</button>
+  </div>
+  <div class="grid-wrap">
+    <div id="grid"></div>
   </div>
 </div>
 
-<script src="game-engine.js?v=5"></script>
+<!-- 游戏HUD -->
+<div id="hud" class="hidden">
+  <div id="hud-left"></div>
+  <div id="hud-right">
+    <button class="hud-btn" id="btnMute" title="音乐">🔊</button>
+    <button class="hud-btn" id="btnPause" title="暂停">⏸</button>
+  </div>
+</div>
+
+<!-- 工具栏 -->
+<div id="tools" class="hidden">
+  <button class="tool-btn" id="btnSlow"><span class="tool-icon">🐢</span><span class="tool-count" id="cntSlow">×1</span></button>
+  <button class="tool-btn" id="btnWiden"><span class="tool-icon">📏</span><span class="tool-count" id="cntWiden">×1</span></button>
+  <button class="tool-btn" id="btnReverse"><span class="tool-icon">🔄</span><span class="tool-count" id="cntReverse">×1</span></button>
+</div>
+
+<!-- 通关/失败面板 -->
+<div id="panel" class="overlay hidden">
+  <div class="card">
+    <div class="card-title" id="ptitle"></div>
+    <div class="card-score" id="pscore"></div>
+    <div class="card-stars" id="pstars"></div>
+    <div class="card-stats" id="pstats"></div>
+    <div class="card-badge" id="pbadge" style="display:none"></div>
+    <div class="card-sub" id="psub"></div>
+    <div class="btn-row" id="pbtnRow"></div>
+    <button class="btn-ghost" id="pbtnHome">🏠 返回首页</button>
+  </div>
+</div>
+
+<!-- 暂停面板 -->
+<div id="pausePanel" class="overlay hidden">
+  <div class="card">
+    <div class="pause-icon">⏸</div>
+    <div class="card-title">游戏暂停</div>
+    <div class="card-sub" id="pauseInfo"></div>
+    <div class="btn-row">
+      <button class="btn-main" id="btnResume">▶ 继续</button>
+      <button class="btn-sec" id="btnQuit">🏠 退出</button>
+    </div>
+  </div>
+</div>
+
+<!-- 每日挑战面板 -->
+<div id="dailyPanel" class="overlay hidden">
+  <div class="daily-card">
+    <div class="daily-badge">📅 今日挑战</div>
+    <div class="daily-title" id="dailyName"></div>
+    <div class="daily-desc" id="dailyDesc"></div>
+    <div class="daily-target" id="dailyTarget"></div>
+    <div class="daily-target-lbl">目标层数</div>
+    <button class="btn-daily-start" id="btnDailyStart">⚡ 开始挑战</button>
+    <button class="btn-ghost" onclick="hide('dailyPanel')">取消</button>
+  </div>
+</div>
+
+<!-- 主题面板 -->
+<div id="themePanel" class="overlay hidden">
+  <div class="card">
+    <div class="card-title">🎨 选择主题</div>
+    <div class="theme-grid" id="themeGrid"></div>
+    <button class="btn-ghost" onclick="hide('themePanel')">关闭</button>
+  </div>
+</div>
+
+<!-- 成就面板 -->
+<div id="achievePanel" class="overlay hidden">
+  <div class="card-title" style="margin-bottom:12px">🏅 成就</div>
+  <div class="achieve-list" id="achieveList"></div>
+  <button class="btn-ghost" style="margin-top:10px;color:#aaa" onclick="hide('achievePanel')">关闭</button>
+</div>
+
+<!-- 新手引导 -->
+<div id="tutorial" class="hidden">
+  <div class="tut-bubble">
+    <h3>👆 怎么玩？</h3>
+    <p>点击屏幕，让滑动的方块落下<br>对准下面的砖块，完美落下会变宽<br>堆够目标层数就算通关！</p>
+  </div>
+  <div class="tut-arrow">👇</div>
+  <div class="tut-skip" id="tutSkip">知道了，开始玩 →</div>
+</div>
+
+<script src="game-engine.js?v=6"></script>
 <script>
 (function(){
 'use strict';
@@ -92,72 +250,104 @@ var C=document.getElementById('c'),X=C.getContext('2d');
 function rs(){var d=Math.min(devicePixelRatio||1,2);C.width=innerWidth*d;C.height=innerHeight*d;C.style.width=innerWidth+'px';C.style.height=innerHeight+'px';X.setTransform(1,0,0,1,0,0);X.scale(d,d);if(typeof game!=='undefined')game.resizeViewport(innerWidth,innerHeight);}
 addEventListener('resize',rs);rs();
 
+// 音频
 var AC=null;
-function au(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}
-function beep(f,d,t,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.setValueAtTime(f,AC.currentTime);g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}
-function L(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
-function S(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function au(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}
+function beep(f,d,t,v){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.setValueAtTime(f,AC.currentTime);g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}
 
-// 每局道具初始数量
+// 震动
+function vib(type){
+  if(!navigator.vibrate)return;
+  if(type==='light')navigator.vibrate(20);
+  else if(type==='medium')navigator.vibrate(40);
+  else if(type==='heavy')navigator.vibrate([30,20,30]);
+}
+
+// 存储
+function L(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function S(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+// 工具函数
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function el(id){return document.getElementById(id);}
+
+// 全局状态
 var TOOLS_PER_ROUND={slow:1,widen:1,reverse:1};
-var curLv=1;
+var curLv=1,muteOn=L('mute',false),isPaused=false,dailyChallenge=null;
 
+// 初始化游戏引擎
 var game=BounceTower.create({
   ctx:X,width:innerWidth,height:innerHeight,
-  useNativeUI:true,  // 禁用引擎内置 canvas 面板，使用 HTML overlay
-  loadBest:function(){return L('best',0)},
-  saveBest:function(v){S('best',v)},
-  requestAnimationFrame:function(fn){return requestAnimationFrame(fn)},
+  useNativeUI:true,
+  loadBest:function(){return L('best',0);},
+  saveBest:function(v){S('best',v);},
+  requestAnimationFrame:function(fn){return requestAnimationFrame(fn);},
   playBeep:beep,
-  onGameOver:function(sc,cb,ly,nb,m,li,lt){showPanel(false,sc,cb,ly,li,lt,0)},
+  vibrate:vib,
+  onGameOver:function(sc,cb,ly,nb,m,li,lt){showResultPanel(false,sc,cb,ly,li,lt);},
   onNewBest:function(){},
-  onAchievement:function(){},
+  onAchievement:function(a){showToast(a.icon+' 成就解锁：'+a.name);},
   onLevelComplete:function(r){
     var stars=L('stars',{});
     var prev=stars[r.levelId]||0;
     if(r.stars>prev){stars[r.levelId]=r.stars;S('stars',stars);}
     S('lvl',Math.min(50,r.levelId+1));
     buildGrid();
-    showPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars,r.levelId+1);
+    showResultPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars);
   },
-  onUseTool:function(){updateTools()},
-  loadStats:function(){return L('stats',{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0})},
-  saveStats:function(v){S('stats',v)},
-  getTheme:function(){return L('theme','default')}
+  onUseTool:function(){updateTools();},
+  loadStats:function(){return L('stats',{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0});},
+  saveStats:function(v){S('stats',v);},
+  getTheme:function(){return L('theme','default');}
 });
 
-// 先设置工具再 init，避免 init 内 reset/persistStats 存脏值
 var initStats=game.getStats();
 initStats.tools.slow=0;initStats.tools.widen=0;initStats.tools.reverse=0;
 game.init();
+if(muteOn)game.bgmStop();
 
+// ===== 首页数据 =====
+function refreshHomeStats(){
+  var st=game.getStats();
+  var stars=L('stars',{});
+  var totalStars=0;for(var k in stars)totalStars+=stars[k]||0;
+  el('statLv').textContent=game.getLevelProgress()||'-';
+  el('statStars').textContent=totalStars||'-';
+  el('statGames').textContent=st.totalGames||'-';
+  el('statCombo').textContent=st.bestComboEver||'-';
+}
+
+// ===== 关卡格 =====
 function buildGrid(){
-  // 优先读独立 'stars' key；旧版本只有 stats.levelStars 时自动 fallback
   var stars=L('stars',null);
   if(!stars||Object.keys(stars).length===0){var st=L('stats',{});stars=st.levelStars||{};}
   var maxUnlocked=1;
-  for(var k in stars){if(stars[k]>=1)maxUnlocked=Math.max(maxUnlocked,parseInt(k)+1)}
+  for(var k in stars){if(stars[k]>=1)maxUnlocked=Math.max(maxUnlocked,parseInt(k)+1);}
   maxUnlocked=Math.min(50,maxUnlocked);
+
+  var sections=[
+    {label:'⚡ 入门 (1-10)',from:1,to:10},
+    {label:'🔥 进阶 (11-20)',from:11,to:20},
+    {label:'💥 高手 (21-30)',from:21,to:30},
+    {label:'👑 传奇 (31-50)',from:31,to:50},
+  ];
   var h='';
-  for(var i=1;i<=50;i++){
-    var s=stars[i]||0,c='';
-    if(s>=1)c='done';if(i>maxUnlocked)c='locked';
-    h+='<div class="'+c+'" data-lv="'+i+'">'+i+'<small>'+BounceTower.LEVELS[i-1].target+'层</small>'+(s>0?'<small>'+'⭐'.repeat(s)+'</small>':'')+'</div>';
-  }
-  document.getElementById('grid').innerHTML=h;
+  sections.forEach(function(sec){
+    h+='<div class="grid-section-label">'+sec.label+'</div>';
+    for(var i=sec.from;i<=sec.to;i++){
+      var s=stars[i]||0,c='';
+      if(s>=1)c='done';if(i>maxUnlocked)c='locked';
+      var starStr=s>0?'<small>'+('⭐'.repeat(s))+'</small>':'';
+      h+='<div class="'+c+'" data-lv="'+i+'">'+i+'<small>'+BounceTower.LEVELS[i-1].target+'层</small>'+starStr+'</div>';
+    }
+  });
+  el('grid').innerHTML=h;
 }
 buildGrid();
+refreshHomeStats();
 
-document.getElementById('btnStart').addEventListener('click',function(){au();startGame(-1)});
-document.getElementById('btnStart').addEventListener('touchstart',function(e){e.preventDefault();au();startGame(-1)});
-document.getElementById('grid').addEventListener('click',function(e){
-  var el=e.target.closest('[data-lv]');
-  if(el&&!el.classList.contains('locked')){au();startGame(parseInt(el.dataset.lv))}
-});
-document.getElementById('btnSlow').addEventListener('click',function(){au();game.useTool('slow');updateTools()});
-document.getElementById('btnWiden').addEventListener('click',function(){au();game.useTool('widen');updateTools()});
-document.getElementById('btnReverse').addEventListener('click',function(){au();game.useTool('reverse');updateTools()});
-
+// ===== Canvas tap =====
 C.addEventListener('touchstart',function(e){
   e.preventDefault();au();
   var s=game.getStatus();
@@ -169,97 +359,223 @@ C.addEventListener('mousedown',function(e){
   if(s==='idle'||s==='playing')game.handleTap();
 });
 
+// ===== 首页按钮 =====
+el('btnStart').addEventListener('click',function(){au();startGame(-1);});
+el('btnStart').addEventListener('touchstart',function(e){e.preventDefault();au();startGame(-1);});
+el('grid').addEventListener('click',function(e){
+  var lv=e.target.closest('[data-lv]');
+  if(lv&&!lv.classList.contains('locked')){au();startGame(parseInt(lv.dataset.lv));}
+});
+el('btnDaily').addEventListener('click',function(){au();openDailyPanel();});
+el('btnAchieve').addEventListener('click',function(){au();openAchievePanel();});
+el('btnTheme').addEventListener('click',function(){au();openThemePanel();});
+
+// ===== HUD 按钮 =====
+el('btnMute').addEventListener('click',function(){
+  au();muteOn=!muteOn;S('mute',muteOn);
+  el('btnMute').textContent=muteOn?'🔇':'🔊';
+  if(muteOn)game.bgmStop();else game.bgmStart();
+});
+el('btnPause').addEventListener('click',function(){au();pauseGame();});
+el('btnResume').addEventListener('click',function(){au();resumeGame();});
+el('btnQuit').addEventListener('click',function(){au();resumeGame();goHome();});
+
+// ===== 工具栏 =====
+el('btnSlow').addEventListener('click',function(){au();game.useTool('slow');updateTools();});
+el('btnWiden').addEventListener('click',function(){au();game.useTool('widen');updateTools();});
+el('btnReverse').addEventListener('click',function(){au();game.useTool('reverse');updateTools();});
+
+// ===== 每日挑战 =====
+el('btnDailyStart').addEventListener('click',function(){
+  au();hide('dailyPanel');
+  if(dailyChallenge)startGameDaily(dailyChallenge);
+});
+
+// ===== 新手引导 =====
+el('tutSkip').addEventListener('click',function(){
+  S('tutDone',1);hide('tutorial');
+});
+
+// ===== 开始游戏 =====
 function startGame(id){
   if(id<0)id=L('lvl',1);
   if(id<1||id>50)id=1;
   curLv=id;
   var lv=BounceTower.LEVELS[id-1];
-
-  // 先设工具再 setMode（setMode 内部会调用 reset，不需要额外调用）
   var st=game.getStats();
   st.tools.slow=TOOLS_PER_ROUND.slow;
   st.tools.widen=TOOLS_PER_ROUND.widen;
   st.tools.reverse=TOOLS_PER_ROUND.reverse;
-
   game.setMode('level',{levelId:lv.id,target:lv.target,speedMul:lv.speedMul});
-
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('panel').classList.add('hidden');
-  document.getElementById('hud').classList.remove('hidden');
-  document.getElementById('tools').classList.remove('hidden');
-  document.getElementById('hud').textContent='🎯 第'+lv.id+'关 · '+lv.name+' · 目标'+lv.target+'层';
+  hide('home');hide('panel');hide('pausePanel');
+  show('hud');show('tools');
+  el('hud-left').textContent='第'+lv.id+'关 · '+lv.name;
+  el('btnMute').textContent=muteOn?'🔇':'🔊';
   updateTools();
-  game.bgmStart();
+  if(!muteOn)game.bgmStart();
+  // 第1关新手引导
+  if(id===1&&!L('tutDone',0)){show('tutorial');}
 }
 
-function goHome(){
-  document.getElementById('panel').classList.add('hidden');
-  document.getElementById('hud').classList.add('hidden');
-  document.getElementById('tools').classList.add('hidden');
-  document.getElementById('home').classList.remove('hidden');
-  game.bgmStop();
-  game.reset();  // 清除 gameover/levelcomplete 状态，回到 idle，canvas 干净
+function startGameDaily(dc){
+  curLv=dc.levelId;
+  var st=game.getStats();
+  st.tools.slow=TOOLS_PER_ROUND.slow;
+  st.tools.widen=TOOLS_PER_ROUND.widen;
+  st.tools.reverse=TOOLS_PER_ROUND.reverse;
+  game.setMode('daily',{levelId:dc.levelId,target:dc.target,speedMul:dc.speedMul});
+  hide('home');hide('panel');hide('pausePanel');
+  show('hud');show('tools');
+  el('hud-left').textContent='📅 今日挑战 · '+dc.name;
+  el('btnMute').textContent=muteOn?'🔇':'🔊';
+  updateTools();
+  if(!muteOn)game.bgmStart();
 }
 
-function updateTools(){
-  var sc=game.getToolCount('slow'),wc=game.getToolCount('widen'),rc=game.getToolCount('reverse');
-  document.getElementById('btnSlow').disabled=sc<=0;
-  document.getElementById('btnWiden').disabled=wc<=0;
-  document.getElementById('btnReverse').disabled=rc<=0;
-  document.getElementById('btnSlow').textContent=sc>0?'🐢×'+sc:'🐢';
-  document.getElementById('btnWiden').textContent=wc>0?'📏×'+wc:'📏';
-  document.getElementById('btnReverse').textContent=rc>0?'🔄×'+rc:'🔄';
+// ===== 暂停/恢复 =====
+function pauseGame(){
+  var s=game.getStatus();
+  if(s!=='playing'&&s!=='idle')return;
+  game.pauseEngine();
+  el('pauseInfo').textContent='第'+curLv+'关 · 已堆 '+game.getScore()+' 层';
+  show('pausePanel');
+  hide('hud');hide('tools');
 }
-
-function showPanel(win,score,cb,ly,li,stars,nextLv){
-  var p=document.getElementById('panel');
-  p.classList.remove('hidden');
-  document.getElementById('hud').classList.add('hidden');
-  document.getElementById('tools').classList.add('hidden');
-
-  document.getElementById('ptitle').textContent=win?'🎉 通关!':'😢 挑战失败';
-  document.getElementById('pscore').textContent=score;
-
-  var starsEl=document.getElementById('pstars');
-  starsEl.textContent=win?'⭐'.repeat(stars)+'☆'.repeat(Math.max(0,3-stars)):'';
-
-  var lv=BounceTower.LEVELS[(li||curLv)-1]||{};
-  if(win){
-    document.getElementById('psub').textContent='最高'+cb+'连击 · '+ly+'层';
-  }else{
-    var remain=(lv.target||0)-score;
-    document.getElementById('psub').textContent=remain>0&&remain<=10?'只差'+remain+'层就过关了! 💪':'目标'+(lv.target||'?')+'层 · 到达'+score+'层';
+function resumeGame(){
+  hide('pausePanel');
+  var s=game.getStatus();
+  if(s==='playing'||s==='idle'){
+    show('hud');show('tools');
+    game.resumeEngine();
+    if(muteOn)game.bgmStop();
   }
+}
 
-  // 替换节点清掉旧事件，同时重置 display
-  function fresh(id){var el=document.getElementById(id),n=el.cloneNode(true);n.style.display='';el.parentNode.replaceChild(n,el);return document.getElementById(id);}
-  var nb1=fresh('pbtn1'),nb2=fresh('pbtn2'),nb3=fresh('pbtn3');
+// ===== 返回首页 =====
+function goHome(){
+  hide('panel');hide('hud');hide('tools');hide('pausePanel');hide('tutorial');
+  show('home');
+  game.bgmStop();
+  game.reset();
+  refreshHomeStats();
+}
 
+// ===== 结果面板 =====
+function showResultPanel(win,score,cb,ly,levelId,starsOrTarget){
+  var stars=win?starsOrTarget:0;
+  hide('hud');hide('tools');
+  show('panel');
+
+  el('ptitle').textContent=win?'🎉 通关!':'😢 挑战失败';
+  el('pscore').textContent=score;
+  el('pstars').textContent=win?('⭐'.repeat(stars)+'☆'.repeat(Math.max(0,3-stars))):'';
+
+  // 详细数据
+  var lv=BounceTower.LEVELS[(levelId||curLv)-1]||{};
+  var pct=levelId<=3?'95%':levelId<=5?'60%':levelId<=10?'30%':levelId<=15?'15%':levelId<=20?'8%':levelId<=25?'3%':levelId<=30?'1%':levelId<=40?'0.1%':'0.01%';
+  el('pstats').innerHTML=
+    '<div class="card-stat"><div class="card-stat-val">'+score+'</div><div class="card-stat-lbl">得分</div></div>'+
+    '<div class="card-stat"><div class="card-stat-val">'+cb+'</div><div class="card-stat-lbl">最高连击</div></div>'+
+    '<div class="card-stat"><div class="card-stat-val">'+ly+'</div><div class="card-stat-lbl">层数</div></div>';
+
+  var badge=el('pbadge');
+  if(win){badge.textContent='🏅 超过了 '+pct+' 的玩家';badge.style.display='inline-block';}
+  else{badge.style.display='none';}
+
+  var sub='';
+  if(win){sub='完美通关需要 '+(Math.ceil(lv.target*1.5))+' 层 (3⭐)';}
+  else{var remain=(lv.target||0)-score;sub=remain>0&&remain<=15?'只差 '+remain+' 层就过关了！💪':'目标 '+(lv.target||'?')+' 层';}
+  el('psub').textContent=sub;
+
+  // 按钮
+  var row=el('pbtnRow');row.innerHTML='';
   if(win){
-    var isLast=li>=50;
-    if(isLast){
-      // 第50关通关特殊处理
-      nb1.textContent='🏠 返回首页';
-      nb1.addEventListener('click',goHome);
-      nb2.textContent='🔁 重玩本关';
-      nb2.addEventListener('click',function(){startGame(50)});
-      nb3.style.display='none';
+    var isLast=(levelId||curLv)>=50;
+    if(!isLast){
+      var nb1=mkBtn('btn-main','▶ 下一关',function(){startGame(levelId+1);});
+      var nb2=mkBtn('btn-sec','🔁 再战本关',function(){startGame(levelId);});
+      row.appendChild(nb1);row.appendChild(nb2);
     }else{
-      nb1.textContent='▶ 下一关';
-      nb1.addEventListener('click',function(){startGame(nextLv)});
-      nb2.textContent='🔁 重玩本关';
-      nb2.addEventListener('click',function(){startGame(li||curLv)});
-      nb3.textContent='🏠 返回首页';
-      nb3.addEventListener('click',goHome);
+      var nb1l=mkBtn('btn-main','🔁 重玩',function(){startGame(50);});
+      row.appendChild(nb1l);
     }
   }else{
-    nb1.textContent='🔄 再试一次';
-    nb1.addEventListener('click',function(){startGame(li||curLv)});
-    nb2.textContent='🏠 返回首页';
-    nb2.addEventListener('click',goHome);
-    nb3.style.display='none';
+    var nb1f=mkBtn('btn-main','🔄 再试一次',function(){startGame(levelId||curLv);});
+    row.appendChild(nb1f);
   }
+  el('pbtnHome').onclick=function(){goHome();};
 }
+function mkBtn(cls,txt,fn){var b=document.createElement('button');b.className=cls;b.textContent=txt;b.addEventListener('click',function(){au();fn();});return b;}
+
+// ===== 工具计数更新 =====
+function updateTools(){
+  var sc=game.getToolCount('slow'),wc=game.getToolCount('widen'),rc=game.getToolCount('reverse');
+  el('btnSlow').disabled=sc<=0;
+  el('btnWiden').disabled=wc<=0;
+  el('btnReverse').disabled=rc<=0;
+  el('cntSlow').textContent=sc>0?'×'+sc:'';
+  el('cntWiden').textContent=wc>0?'×'+wc:'';
+  el('cntReverse').textContent=rc>0?'×'+rc:'';
+}
+
+// ===== 成就 Toast =====
+var toastTimer=null;
+function showToast(msg){
+  var t=el('toast');t.textContent=msg;t.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+// ===== 每日挑战 =====
+function openDailyPanel(){
+  dailyChallenge=game.getDailyChallenge();
+  el('dailyName').textContent=dailyChallenge.name;
+  el('dailyDesc').textContent=dailyChallenge.desc||'今日特别挑战';
+  el('dailyTarget').textContent=dailyChallenge.target;
+  show('dailyPanel');
+}
+
+// ===== 主题选择 =====
+function openThemePanel(){
+  var themes=BounceTower.THEMES;
+  var cur=L('theme','default');
+  var g=el('themeGrid');g.innerHTML='';
+  Object.keys(themes).forEach(function(key){
+    var th=themes[key];
+    var item=document.createElement('div');
+    item.className='theme-item'+(key===cur?' active':'');
+    var dot=document.createElement('div');
+    dot.className='theme-dot';
+    dot.style.background='linear-gradient(90deg,'+th.pals[0][0]+','+th.pals[0][1]+')';
+    var lbl=document.createElement('div');
+    lbl.textContent=th.name;
+    item.appendChild(dot);item.appendChild(lbl);
+    item.addEventListener('click',function(){
+      S('theme',key);game.refreshTheme();
+      g.querySelectorAll('.theme-item').forEach(function(i){i.classList.remove('active');});
+      item.classList.add('active');
+    });
+    g.appendChild(item);
+  });
+  show('themePanel');
+}
+
+// ===== 成就列表 =====
+function openAchievePanel(){
+  var unlocked=game.getStats().unlockedAchievements;
+  var list=el('achieveList');list.innerHTML='';
+  BounceTower.ACHIEVEMENTS.forEach(function(a){
+    var done=unlocked.indexOf(a.id)!==-1;
+    var item=document.createElement('div');
+    item.className='achieve-item'+(done?'':' locked');
+    item.innerHTML='<div class="achieve-icon">'+a.icon+'</div>'+
+      '<div class="achieve-info"><div class="achieve-name">'+a.name+'</div><div class="achieve-desc">'+a.desc+'</div></div>'+
+      '<div class="achieve-check">'+(done?'✅':'🔒')+'</div>';
+    list.appendChild(item);
+  });
+  show('achievePanel');
+}
+
 
 })();
 </script>
