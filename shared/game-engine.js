@@ -84,7 +84,7 @@ var ACHIEVEMENTS = [
 ];
 
 var THEMES = {
-  default:{name:'糖果乐园',bg:['#fef9f0','#fef5e7','#fef9f0'],pals:[['#FF6B6B','#FF8E72','#FFA07A'],['#4ECDC4','#6EE7DE','#44B3AA'],['#A78BFA','#C4B5FD','#8B5CF6'],['#F59E0B','#FBBF24','#FCD34D'],['#EC4899','#F472B6','#FB85C7'],['#06B6D4','#22D3EE','#67E8F9'],['#84CC16','#A3E635','#BEF264']],cost:0},
+  default:{name:'糖果乐园',bg:['#efe8dc','#e8dfd2','#efe8dc'],pals:[['#FF6B6B','#FF8E72','#FFA07A'],['#4ECDC4','#6EE7DE','#44B3AA'],['#A78BFA','#C4B5FD','#8B5CF6'],['#F59E0B','#FBBF24','#FCD34D'],['#EC4899','#F472B6','#FB85C7'],['#06B6D4','#22D3EE','#67E8F9'],['#84CC16','#A3E635','#BEF264']],cost:0},
   ocean:{name:'晴空万里',bg:['#e8f4fd','#dcecf9','#e8f4fd'],pals:[['#0077B6','#0096C7','#00B4D8'],['#48CAE4','#90E0EF','#ADE8F4'],['#023E8A','#0077B6','#0096C7']],cost:1},
   sunset:{name:'橘子汽水',bg:['#fff5f0','#ffe8dc','#fff5f0'],pals:[['#FF6B35','#F7C59F','#EFEFD0'],['#F7931E','#FF6B6B','#FF8E72'],['#E84855','#FF6B35','#F7931E']],cost:1},
   neon:{name:'赛博乐园',bg:['#f5f0ff','#ede0ff','#f5f0ff'],pals:[['#FF00FF','#FF69B4','#FF1493'],['#00FFFF','#00CED1','#40E0D0'],['#FFD700','#FFA500','#FF8C00']],cost:2},
@@ -479,13 +479,14 @@ function create(platform){
     if(scaleY!==1)ctx.scale(1,scaleY);
     if(rot!==0)ctx.rotate(rot);
     ctx.globalAlpha=a;
-    ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=5;ctx.shadowOffsetY=2;
+    ctx.shadowColor='rgba(0,0,0,0.12)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
     var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
-    g.addColorStop(0,shade(c,20));g.addColorStop(0.5,c);g.addColorStop(1,shade(c,-30));
+    g.addColorStop(0,shade(c,30));g.addColorStop(0.3,c);g.addColorStop(1,shade(c,-35));
     rrect(-w/2,-h/2,w,h,4,g);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(-w/2+3,-h/2+2,w-6,Math.min(4,h*0.1));
-    ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(-w/2,-h/2+h-2,w,2);
+    ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(-w/2+2,-h/2+2,w-4,Math.min(3,h*0.08));
+    ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(-w/2,-h/2+h-3,w,3);
+    ctx.strokeStyle='rgba(0,0,0,0.12)';ctx.lineWidth=0.8;ctx.strokeRect(-w/2,-h/2,w,h);
     ctx.restore();
   }
   function dText(t,x,y,s,c,a,sc,sb){a=a||'center';sb=sb||0;ctx.font='900 '+s+'px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign=a;ctx.textBaseline='middle';if(sb>0&&sc){ctx.shadowColor=sc;ctx.shadowBlur=sb;}ctx.fillStyle=c;ctx.fillText(t,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;}
@@ -547,10 +548,13 @@ function create(platform){
         ctx.globalAlpha=0.04;dBlock(cur.x-cur.dir*cur.baseSpeed*9,cur.y-cam,cur.w,BH(),cur.color,0.04);
         ctx.globalAlpha=0.07;dBlock(cur.x-cur.dir*cur.baseSpeed*5,cur.y-cam,cur.w,BH(),cur.color,0.07);
         ctx.globalAlpha=1;
-        ctx.save();ctx.translate(cur.x+cur.w/2,cur.y-cam+BH()/2);
-        ctx.strokeStyle='rgba(255,200,0,'+(0.3+Math.sin(Date.now()/250)*0.15)+')';ctx.lineWidth=2.5;
-        ctx.strokeRect(-cur.w/2-2,-BH()/2-2,cur.w+4,BH()+4);ctx.restore();
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color,1,0,blockScaleY);
+        // 脉冲边框（画在方块之上，确保可见）
+        ctx.save();ctx.translate(cur.x+cur.w/2,cur.y-cam+BH()/2);
+        ctx.strokeStyle='rgba(255,200,50,0.7)';ctx.lineWidth=2.5;
+        ctx.shadowColor='rgba(255,200,50,0.4)';ctx.shadowBlur=10;
+        ctx.strokeRect(-cur.w/2-2,-BH()/2-2,cur.w+4,BH()+4);
+        ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.restore();
       }else{
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color);
       }
