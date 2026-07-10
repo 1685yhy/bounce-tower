@@ -558,16 +558,16 @@ function create(platform){
         ctx.globalAlpha=0.04;dBlock(cur.x-cur.dir*cur.baseSpeed*9,cur.y-cam,cur.w,BH(),cur.color,0.04);
         ctx.globalAlpha=0.07;dBlock(cur.x-cur.dir*cur.baseSpeed*5,cur.y-cam,cur.w,BH(),cur.color,0.07);
         ctx.globalAlpha=1;
-        ctx.save();ctx.translate(cur.x,cur.y-cam);
-        ctx.strokeStyle='rgba(255,255,255,'+(0.12+Math.sin(Date.now()/250)*0.08)+')';ctx.lineWidth=2;
-        ctx.strokeRect(-cur.w/2-1,-BH()/2-1,cur.w+2,BH()+2);ctx.restore();
+        ctx.save();ctx.translate(cur.x+cur.w/2,cur.y-cam+BH()/2);
+        ctx.strokeStyle='rgba(255,200,0,'+(0.3+Math.sin(Date.now()/250)*0.15)+')';ctx.lineWidth=2.5;
+        ctx.strokeRect(-cur.w/2-2,-BH()/2-2,cur.w+4,BH()+4);ctx.restore();
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color,1,0,blockScaleY);
       }else{
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color);
       }
     }
 
-    for(var j=0;j<fps.length;j++){var f=fps[j];dBlock(f.x-f.w/2,f.y-f.h/2-cam,f.w,f.h,f.color,0.9,f.rot);}
+    for(var j=0;j<fps.length;j++){var f=fps[j];dBlock(f.x,f.y-cam,f.w,f.h,f.color,0.9,f.rot);}
     for(var k=0;k<pts.length;k++){var pt=pts[k];ctx.fillStyle=pt.color;ctx.globalAlpha=pt.life;if(pt.shape==='rect'){var s2=pt.size;ctx.fillRect(pt.x-s2/2,pt.y-cam-s2/2,s2,s2);}else{ctx.beginPath();ctx.arc(pt.x,pt.y-cam,pt.size,0,Math.PI*2);ctx.fill();}}
     ctx.globalAlpha=1;
 
