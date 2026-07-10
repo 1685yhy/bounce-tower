@@ -252,9 +252,9 @@ function create(platform){
 
   function swBounds(bw){
     var t=topOfStack(),hs=t.w/2,hb=bw/2,cx=t.x+hs;
-    var extraMul=levelId===1?0.5:2.5;  // 第1关缩小范围，第2关起正常
+    var extraMul=levelId===1?0.5:1.8;
     var extra=t.w*extraMul;
-    return {min:cx-hs-hb-extra, max:cx+hs+hb+extra, cx:cx};
+    return {min: Math.max(cx-hs-hb-extra, 10), max: Math.min(cx+hs+hb+extra, W-10), cx: cx};
   }
 
   function spawnBlock(){
@@ -459,7 +459,7 @@ function create(platform){
       if(cur.spawnAnim>0)cur.spawnAnim=Math.max(0,cur.spawnAnim-0.15);
       var b=cur,bd=swBounds(b.w);
       var effectiveSpeed=slowMotionActive?b.baseSpeed*0.3:b.baseSpeed;
-      b.x+=effectiveSpeed*b.dir;
+      b.x+=effectiveSpeed*b.dir*delta/16;  // delta补偿，帧率无关
       if(b.x<=bd.min){b.x=bd.min;b.dir=1;}else if(b.x+b.w>=bd.max){b.x=bd.max-b.w;b.dir=-1;}
     }
     // 从底部向堆叠区上冲
@@ -476,27 +476,17 @@ function create(platform){
   function dBlock(x,y,w,h,c,a,rot,scaleY){
     a=a===undefined?1:a;rot=rot||0;scaleY=scaleY||1;
     ctx.save();ctx.translate(x+w/2,y+h/2);
+    if(scaleY!==1)ctx.scale(1,scaleY);  // ✅ 先缩放再绘图，让弹性动画生效
     if(rot!==0)ctx.rotate(rot);
     ctx.globalAlpha=a;
-    // 投影
     ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
-    // 3D砖块：主面 + 顶边高光 + 底边暗影 + 侧边深度
-    // 主面 - 渐变
     var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
-    g.addColorStop(0,shade(c,25));
-    g.addColorStop(0.15,c);
-    g.addColorStop(0.85,shade(c,-15));
-    g.addColorStop(1,shade(c,-35));
+    g.addColorStop(0,shade(c,25));g.addColorStop(0.15,c);g.addColorStop(0.85,shade(c,-15));g.addColorStop(1,shade(c,-35));
     rrect(-w/2,-h/2,w,h,4,g);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    // 顶边高光线
     ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(-w/2+5,-h/2+2,w-10,Math.min(5,h*0.12));
-    // 底边暗影线
     ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(-w/2,-h/2+h-4,w,3);
-    // 侧边深度（左右各一条暗线）
-    ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(-w/2,-h/2+4,2,h-8);
-    ctx.fillRect(w/2-2,-h/2+4,2,h-8);
-    if(scaleY!==1)ctx.scale(1,scaleY);  // 弹性动画在投影后应用，不拉伸阴影
+    ctx.fillStyle='rgba(0,0,0,0.08)';ctx.fillRect(-w/2,-h/2+4,2,h-8);ctx.fillRect(w/2-2,-h/2+4,2,h-8);
     ctx.restore();
   }
   function dText(t,x,y,s,c,a,sc,sb){a=a||'center';sb=sb||0;ctx.font='900 '+s+'px -apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif';ctx.textAlign=a;ctx.textBaseline='middle';if(sb>0&&sc){ctx.shadowColor=sc;ctx.shadowBlur=sb;}ctx.fillStyle=c;ctx.fillText(t,x,y);ctx.shadowColor='transparent';ctx.shadowBlur=0;}
@@ -558,16 +548,16 @@ function create(platform){
         ctx.globalAlpha=0.04;dBlock(cur.x-cur.dir*cur.baseSpeed*9,cur.y-cam,cur.w,BH(),cur.color,0.04);
         ctx.globalAlpha=0.07;dBlock(cur.x-cur.dir*cur.baseSpeed*5,cur.y-cam,cur.w,BH(),cur.color,0.07);
         ctx.globalAlpha=1;
-        ctx.save();ctx.translate(cur.x,cur.y-cam);
-        ctx.strokeStyle='rgba(255,255,255,'+(0.12+Math.sin(Date.now()/250)*0.08)+')';ctx.lineWidth=2;
-        ctx.strokeRect(-cur.w/2-1,-BH()/2-1,cur.w+2,BH()+2);ctx.restore();
+        ctx.save();ctx.translate(cur.x+cur.w/2,cur.y-cam+BH()/2);
+        ctx.strokeStyle='rgba(255,200,0,'+(0.3+Math.sin(Date.now()/250)*0.15)+')';ctx.lineWidth=2.5;
+        ctx.strokeRect(-cur.w/2-2,-BH()/2-2,cur.w+4,BH()+4);ctx.restore();
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color,1,0,blockScaleY);
       }else{
         dBlock(cur.x,cur.y-cam,cur.w,BH(),cur.color);
       }
     }
 
-    for(var j=0;j<fps.length;j++){var f=fps[j];dBlock(f.x-f.w/2,f.y-f.h/2-cam,f.w,f.h,f.color,0.9,f.rot);}
+    for(var j=0;j<fps.length;j++){var f=fps[j];dBlock(f.x,f.y-cam,f.w,f.h,f.color,0.9,f.rot);}
     for(var k=0;k<pts.length;k++){var pt=pts[k];ctx.fillStyle=pt.color;ctx.globalAlpha=pt.life;if(pt.shape==='rect'){var s2=pt.size;ctx.fillRect(pt.x-s2/2,pt.y-cam-s2/2,s2,s2);}else{ctx.beginPath();ctx.arc(pt.x,pt.y-cam,pt.size,0,Math.PI*2);ctx.fill();}}
     ctx.globalAlpha=1;
 
