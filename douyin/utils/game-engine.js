@@ -12,55 +12,55 @@
 // 奇数关缓冲·偶数关断崖·每5关难度峰值·31关起关内变速
 var LEVELS = [
   {id:1, name:'你好世界',   target:8,   speedMul:0.6, widthPct:0.80, desc:'闭着眼都能过'},
-  {id:2, name:'地狱之门',   target:15,  speedMul:2.0, widthPct:0.55, desc:'90%玩家死在这'},
-  {id:3, name:'喘口气',     target:12,  speedMul:1.0, widthPct:0.65, desc:'缓一缓'},
-  {id:4, name:'升温',       target:20,  speedMul:2.3, widthPct:0.45, desc:'手开始冒汗'},
-  {id:5, name:'节奏来了',   target:14,  speedMul:1.1, widthPct:0.60, desc:'⭐ 找到感觉了'},
-  {id:6, name:'步步惊心',   target:22,  speedMul:2.4, widthPct:0.43, desc:'集中注意力'},
-  {id:7, name:'稍微缓缓',   target:16,  speedMul:1.2, widthPct:0.58, desc:'别被骗了'},
-  {id:8, name:'加速',       target:25,  speedMul:2.5, widthPct:0.40, desc:'手指在发抖'},
-  {id:9, name:'稳住',       target:18,  speedMul:1.3, widthPct:0.55, desc:'你能行的'},
-  {id:10,name:'分水岭',     target:35,  speedMul:2.5, widthPct:0.38, desc:'⭐ 半数玩家止步于此'},
-  {id:11,name:'悬崖勒马',   target:20,  speedMul:1.4, widthPct:0.52, desc:'快用道具'},
-  {id:12,name:'真刀真枪',   target:30,  speedMul:2.6, widthPct:0.35, desc:'超过70%玩家'},
-  {id:13,name:'喘息之间',   target:22,  speedMul:1.5, widthPct:0.50, desc:'让你歇一秒'},
-  {id:14,name:'地狱深处',   target:35,  speedMul:2.7, widthPct:0.32, desc:'只有30%能过'},
-  {id:15,name:'里程碑',     target:25,  speedMul:1.5, widthPct:0.48, desc:'⭐ 你已经很强了'},
-  {id:16,name:'精英门槛',   target:40,  speedMul:2.8, widthPct:0.30, desc:'前20%玩家'},
-  {id:17,name:'暴风雨前',   target:28,  speedMul:1.6, widthPct:0.46, desc:'给你歇口气'},
-  {id:18,name:'极限挑战',   target:45,  speedMul:2.9, widthPct:0.28, desc:'只有10%能看到这'},
-  {id:19,name:'绿洲',       target:30,  speedMul:1.6, widthPct:0.44, desc:'最后的温柔'},
-  {id:20,name:'生死线',     target:60,  speedMul:3.0, widthPct:0.28, desc:'⭐ 前5%·传说门槛'},
-  {id:21,name:'大师入门',   target:35,  speedMul:1.8, widthPct:0.42, desc:'大师联赛'},
-  {id:22,name:'狂风暴雨',   target:55,  speedMul:3.1, widthPct:0.26, desc:'确定还要继续？'},
-  {id:23,name:'休整',       target:38,  speedMul:1.8, widthPct:0.40, desc:'最后休息站'},
-  {id:24,name:'不归路',     target:65,  speedMul:3.2, widthPct:0.24, desc:'只有1%能看到这'},
-  {id:25,name:'传奇',       target:42,  speedMul:1.9, widthPct:0.38, desc:'⭐ 前1%·炫耀资格'},
-  {id:26,name:'神之试炼',   target:70,  speedMul:3.3, widthPct:0.22, desc:'0.1%通关率'},
-  {id:27,name:'天堑',       target:48,  speedMul:2.0, widthPct:0.36, desc:'难以置信'},
-  {id:28,name:'登天之路',   target:80,  speedMul:3.4, widthPct:0.20, desc:'传奇诞生中'},
-  {id:29,name:'最后之门',   target:55,  speedMul:2.1, widthPct:0.34, desc:'没有人相信'},
-  {id:30,name:'弹弹神话',   target:85,  speedMul:3.5, widthPct:0.22, desc:'👑 前1%'},
-  {id:31,name:'封神之路',   target:60,  speedMul:2.2, widthPct:0.32, desc:'变速开始，捉摸不定'},
-  {id:32,name:'疾风骤雨',   target:90,  speedMul:3.6, widthPct:0.20, desc:'0.8%通关率'},
-  {id:33,name:'大师修炼',   target:65,  speedMul:2.3, widthPct:0.30, desc:'节奏变了'},
-  {id:34,name:'百层挑战',   target:100, speedMul:3.7, widthPct:0.18, desc:'0.5%通关率'},
-  {id:35,name:'风暴之眼',   target:70,  speedMul:2.4, widthPct:0.28, desc:'⭐ 1.5%玩家到这里'},
-  {id:36,name:'混沌之门',   target:110, speedMul:3.8, widthPct:0.17, desc:'0.3%通关率'},
-  {id:37,name:'逆流而上',   target:75,  speedMul:2.5, widthPct:0.26, desc:'越来越快'},
-  {id:38,name:'深渊凝视',   target:120, speedMul:3.9, widthPct:0.16, desc:'0.2%通关率'},
-  {id:39,name:'意志之战',   target:80,  speedMul:2.6, widthPct:0.24, desc:'毅力的考验'},
-  {id:40,name:'极限突破',   target:130, speedMul:4.0, widthPct:0.15, desc:'⭐ 0.15%·封神门槛'},
-  {id:41,name:'神域之路',   target:85,  speedMul:2.7, widthPct:0.23, desc:'常人难以企及'},
-  {id:42,name:'天罚',       target:135, speedMul:4.1, widthPct:0.14, desc:'0.1%通关率'},
-  {id:43,name:'超凡脱俗',   target:90,  speedMul:2.8, widthPct:0.22, desc:'传说级别'},
-  {id:44,name:'神罚降临',   target:140, speedMul:4.2, widthPct:0.13, desc:'0.05%通关率'},
-  {id:45,name:'封神候选',   target:95,  speedMul:2.9, widthPct:0.21, desc:'⭐ 万里挑一'},
-  {id:46,name:'末日审判',   target:145, speedMul:4.3, widthPct:0.12, desc:'0.01%通关率'},
-  {id:47,name:'神迹之前',   target:100, speedMul:3.0, widthPct:0.20, desc:'百层成就'},
-  {id:48,name:'混沌深渊',   target:147, speedMul:4.4, widthPct:0.11, desc:'0.005%通关率'},
-  {id:49,name:'封神之战',   target:105, speedMul:3.1, widthPct:0.19, desc:'最后的修炼'},
-  {id:50,name:'弹弹之神',   target:150, speedMul:4.5, widthPct:0.15, desc:'👑 0.001%·你是神'},
+  {id:2, name:'地狱之门',   target:12,  speedMul:1.6, widthPct:0.68, desc:'第2关·大多数人死在这'},
+  {id:3, name:'喘口气',     target:10,  speedMul:0.9, widthPct:0.74, desc:'缓一缓'},
+  {id:4, name:'升温',       target:16,  speedMul:1.9, widthPct:0.58, desc:'手开始冒汗'},
+  {id:5, name:'节奏来了',   target:13,  speedMul:1.1, widthPct:0.66, desc:'⭐ 找到感觉了'},
+  {id:6, name:'步步惊心',   target:20,  speedMul:2.1, widthPct:0.54, desc:'集中注意力'},
+  {id:7, name:'稍微缓缓',   target:16,  speedMul:1.2, widthPct:0.62, desc:'别被骗了'},
+  {id:8, name:'加速',       target:22,  speedMul:2.3, widthPct:0.50, desc:'手指在发抖'},
+  {id:9, name:'稳住',       target:18,  speedMul:1.4, widthPct:0.58, desc:'你能行的'},
+  {id:10,name:'分水岭',     target:28,  speedMul:2.4, widthPct:0.46, desc:'⭐ 半数玩家止步于此'},
+  {id:11,name:'悬崖勒马',   target:22,  speedMul:1.5, widthPct:0.54, desc:'快用道具'},
+  {id:12,name:'真刀真枪',   target:30,  speedMul:2.5, widthPct:0.44, desc:'超过大多数玩家'},
+  {id:13,name:'喘息之间',   target:24,  speedMul:1.5, widthPct:0.52, desc:'让你歇一秒'},
+  {id:14,name:'地狱深处',   target:34,  speedMul:2.6, widthPct:0.42, desc:'只有30%能过'},
+  {id:15,name:'里程碑',     target:26,  speedMul:1.6, widthPct:0.50, desc:'⭐ 你已经很强了'},
+  {id:16,name:'精英门槛',   target:38,  speedMul:2.7, widthPct:0.40, desc:'前20%玩家'},
+  {id:17,name:'暴风雨前',   target:28,  speedMul:1.7, widthPct:0.48, desc:'给你歇口气'},
+  {id:18,name:'极限挑战',   target:42,  speedMul:2.8, widthPct:0.38, desc:'只有10%能看到这'},
+  {id:19,name:'绿洲',       target:30,  speedMul:1.7, widthPct:0.46, desc:'最后的温柔'},
+  {id:20,name:'生死线',     target:50,  speedMul:2.9, widthPct:0.36, desc:'⭐ 前5%·传说门槛'},
+  {id:21,name:'大师入门',   target:35,  speedMul:1.8, widthPct:0.44, desc:'大师联赛'},
+  {id:22,name:'狂风暴雨',   target:55,  speedMul:3.0, widthPct:0.34, desc:'确定还要继续？'},
+  {id:23,name:'休整',       target:38,  speedMul:1.9, widthPct:0.42, desc:'最后休息站'},
+  {id:24,name:'不归路',     target:60,  speedMul:3.1, widthPct:0.32, desc:'只有1%能看到这'},
+  {id:25,name:'传奇',       target:42,  speedMul:2.0, widthPct:0.40, desc:'⭐ 前1%·炫耀资格'},
+  {id:26,name:'神之试炼',   target:65,  speedMul:3.2, widthPct:0.30, desc:'0.1%通关率'},
+  {id:27,name:'天堑',       target:46,  speedMul:2.1, widthPct:0.38, desc:'难以置信'},
+  {id:28,name:'登天之路',   target:72,  speedMul:3.3, widthPct:0.28, desc:'传奇诞生中'},
+  {id:29,name:'最后之门',   target:50,  speedMul:2.2, widthPct:0.36, desc:'没有人相信'},
+  {id:30,name:'弹弹神话',   target:80,  speedMul:3.4, widthPct:0.26, desc:'👑 前0.5%'},
+  {id:31,name:'封神之路',   target:55,  speedMul:2.3, widthPct:0.34, desc:'变速开始，捉摸不定'},
+  {id:32,name:'疾风骤雨',   target:85,  speedMul:3.5, widthPct:0.24, desc:'0.3%通关率'},
+  {id:33,name:'大师修炼',   target:60,  speedMul:2.4, widthPct:0.32, desc:'节奏变了'},
+  {id:34,name:'百层挑战',   target:90,  speedMul:3.6, widthPct:0.22, desc:'0.2%通关率'},
+  {id:35,name:'风暴之眼',   target:65,  speedMul:2.5, widthPct:0.30, desc:'⭐ 前0.1%'},
+  {id:36,name:'混沌之门',   target:95,  speedMul:3.7, widthPct:0.21, desc:'极少人到这里'},
+  {id:37,name:'逆流而上',   target:70,  speedMul:2.6, widthPct:0.28, desc:'越来越快'},
+  {id:38,name:'深渊凝视',   target:100, speedMul:3.8, widthPct:0.20, desc:'百层·传说'},
+  {id:39,name:'意志之战',   target:75,  speedMul:2.7, widthPct:0.27, desc:'毅力的考验'},
+  {id:40,name:'极限突破',   target:105, speedMul:3.9, widthPct:0.19, desc:'⭐ 封神门槛'},
+  {id:41,name:'神域之路',   target:80,  speedMul:2.8, widthPct:0.26, desc:'常人难以企及'},
+  {id:42,name:'天罚',       target:110, speedMul:4.0, widthPct:0.18, desc:'0.05%通关率'},
+  {id:43,name:'超凡脱俗',   target:85,  speedMul:2.9, widthPct:0.25, desc:'传说级别'},
+  {id:44,name:'神罚降临',   target:115, speedMul:4.1, widthPct:0.17, desc:'0.02%通关率'},
+  {id:45,name:'封神候选',   target:90,  speedMul:3.0, widthPct:0.24, desc:'⭐ 万里挑一'},
+  {id:46,name:'末日审判',   target:120, speedMul:4.2, widthPct:0.16, desc:'0.01%通关率'},
+  {id:47,name:'神迹之前',   target:95,  speedMul:3.1, widthPct:0.23, desc:'神迹在前'},
+  {id:48,name:'混沌深渊',   target:125, speedMul:4.3, widthPct:0.15, desc:'0.005%通关率'},
+  {id:49,name:'封神之战',   target:100, speedMul:3.2, widthPct:0.22, desc:'最后的修炼'},
+  {id:50,name:'弹弹之神',   target:130, speedMul:4.4, widthPct:0.14, desc:'👑 0.001%·你是神'},
 ];
 
 var ACHIEVEMENTS = [
@@ -118,11 +118,11 @@ function create(platform){
     var base=Math.min(W*0.5,200);
     var lv=LEVELS[levelId-1];
     var pct=lv?lv.widthPct:0.8;
-    return Math.max(40,Math.round(base*pct));
+    return Math.max(55,Math.round(base*pct));  // 最小55px，保证肉眼可见
   }
-  var PERF=4;
+  function PERF(){return Math.max(4,Math.round(IBW()*0.06));}  // 完美判定=方块宽6%，随宽度缩放
   function SPB(){return W*0.014;}
-  function SPI(){return W*0.00055;}
+  function SPI(){return W*0.000026;}  // 大幅降低关内加速，避免后期末速超屏幕宽
 
   var status='idle',stack=[],cur=null,score=0,combo=0,maxCombo=0,bestScore=0,perfCount=0;
   var camY=0,tCamY=0,pts=[],fps=[],dp=0,dtY=0,cpt=0,cpText='',cpColor='#fff';
@@ -253,7 +253,7 @@ function create(platform){
   function placeBlock(){
     var b=cur,t=topOfStack(),bL=b.x,bR=b.x+b.w,sL=t.x,sR=t.x+t.w,oL=Math.max(bL,sL),oR=Math.min(bR,sR),oW=oR-oL;
     if(oW<=0){gameOver();return;}
-    var isPerf=Math.abs(b.x-t.x)<=PERF;var cutLoss=isPerf?0:Math.abs(b.x-t.x)*0.3;var finalW=Math.max(30,oW-cutLoss);var pb={x:oL+(oW-finalW)/2,y:t.y,w:finalW,color:b.color};
+    var isPerf=Math.abs(b.x-t.x)<=PERF();var cutLoss=isPerf?0:Math.abs(b.x-t.x)*0.3;var finalW=Math.max(30,oW-cutLoss);var pb={x:oL+(oW-finalW)/2,y:t.y,w:finalW,color:b.color};
     if(bL<sL)fps.push({x:bL,y:t.y,w:sL-bL,h:BH(),color:b.color,vy:-1,vx:-2-Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
     if(bR>sR)fps.push({x:sR,y:t.y,w:bR-sR,h:BH(),color:b.color,vy:-1,vx:2+Math.random()*3,rot:0,rs:(Math.random()-0.5)*0.2});
     stack.push(pb);score++;wasNewBest=false;
