@@ -295,7 +295,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
   <div class="tut-skip" id="tutSkip">知道了，开始玩 →</div>
 </div>
 
-<script src="game-engine.js?v=15"></script>
+<script src="game-engine.js?v=16"></script>
 <script>
 (function(){
 'use strict';
@@ -362,7 +362,9 @@ var game=BounceTower.create({
       S('lvl',Math.min(50,r.levelId+1));
       renderProgressDots();
     }
-    showResultPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars,r.wasNewBest);
+    // 每日挑战通关奖励道具
+  if(r.mode==='daily'){var st2=game.getStats();st2.tools.slow+=1;st2.tools.widen+=1;st2.tools.reverse+=1;showToast('🎁 每日通关奖励道具 +3');}
+  showResultPanel(true,r.score,r.maxCombo,r.layers,r.levelId,r.stars,r.wasNewBest);
   },
   onUseTool:function(){updateTools();},
   loadStats:function(){return L('stats',{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0});},
@@ -416,6 +418,11 @@ function refreshDailyPreview(){
 
 refreshHomeStats();
 refreshDailyPreview();
+// 进度圆点点击跳关（只需绑定一次）
+el('progressDots').addEventListener('click',function(e){
+  var idx=Array.prototype.indexOf.call(this.children,e.target);
+  if(idx>=0){var lv=idx+1;if(lv<=game.getLevelProgress()+1)startGame(lv);}
+});
 
 // ===== Canvas tap =====
 C.addEventListener('touchstart',function(e){
@@ -543,7 +550,7 @@ function showResultPanel(win,score,cb,ly,levelId,starsOrTarget,wasNewBest){
 
   if(!win){
     // ===== 失败面板 =====
-    var remain=(BounceTower.LEVELS[(levelId||curLv)-1]||{}).target-score;
+    var cpScore=game.getCheckpointScore();var remain=(BounceTower.LEVELS[(levelId||curLv)-1]||{}).target-score;
     p.innerHTML='<div class="panel-fail">'+
       '<div class="pf-emoji">😢</div>'+
       '<div class="pf-title">差一点就过了</div>'+
@@ -552,10 +559,12 @@ function showResultPanel(win,score,cb,ly,levelId,starsOrTarget,wasNewBest){
       '<div class="pf-close">'+(remain>0&&remain<=15?'只差 <strong>'+remain+'</strong> 层！':(remain>0?'还差 '+remain+' 层':'继续加油'))+'</div>'+
       '<div class="pf-actions">'+
         '<button class="pf-btn-main" id="pRetry">🔄 再试一次</button>'+
+        (cpScore>0?'<button class="pf-btn-main" style="background:linear-gradient(135deg,#667eea,#764ba2)" id="pRevive">💪 续关（'+cpScore+'层）</button>':'')+
         '<button class="pf-btn-share" id="pShareFail">📤 分享得道具</button>'+
         '<button class="pf-btn-sub" id="pHomeFail">🏠 返回首页</button>'+
       '</div></div>';
     el('pRetry').addEventListener('click',function(){au();startGame(levelId||curLv);});
+    if(cpScore)el('pRevive').addEventListener('click',function(){au();game.revive();hide('panel');show('hud');show('tools');if(!muteOn)game.bgmStart();});
     el('pShareFail').addEventListener('click',function(){au();shareScore(score,cb,levelId);});
     el('pHomeFail').addEventListener('click',goHome);
     show('panel');
@@ -609,7 +618,8 @@ function showToast(msg){
 function openDailyPanel(){
   dailyChallenge=game.getDailyChallenge();
   el('dailyName').textContent=dailyChallenge.name;
-  el('dailyDesc').textContent=dailyChallenge.desc||'今日特别挑战';
+  var mut=dailyChallenge.mutator;
+  el('dailyDesc').textContent=(mut?'⚡ '+mut.name+' · '+mut.desc: '今日特别挑战');
   el('dailyTarget').textContent=dailyChallenge.target;
   show('dailyPanel');
 }

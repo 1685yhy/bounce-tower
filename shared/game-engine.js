@@ -131,6 +131,7 @@ function create(platform){
   var themeId='default',pals=THEMES.default.pals,bgColors=THEMES.default.bg,pi=0,ci=0;
   var slowMotionTimer=0,slowMotionActive=false;
   var landAnim=0;
+  var checkpointScore=0;  // 续关存档点（target的50%）
 
   // 离屏背景
   var bgCanvas=null,bgDirty=true;
@@ -183,7 +184,7 @@ function create(platform){
     bgmTimer=setTimeout(bgmScheduleNext,note.d*1000);
   }
 
-  function spawnPts(x,y,n,c,sm){sm=sm||1;if(pts.length>200)return;for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2,s=(2+Math.random()*6)*sm;var shape=Math.random()<0.3?'rect':'circle';pts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3*sm,life:1,decay:0.008+Math.random()*0.02,size:3+Math.random()*5,color:c,shape:shape});}}
+  function spawnPts(x,y,n,c,sm){sm=sm||1;if(pts.length>180){for(var pi=pts.length-1;pi>=0;pi--){if(pts[pi].life<=0.1)pts.splice(pi,1);}}if(pts.length>200)return;for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2,s=(2+Math.random()*6)*sm;var shape=Math.random()<0.3?'rect':'circle';pts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3*sm,life:1,decay:0.008+Math.random()*0.02,size:3+Math.random()*5,color:c,shape:shape});}}
 
   var stats=loadStats();
   if(!stats.totalGames)stats.totalGames=0;
@@ -260,12 +261,17 @@ function create(platform){
     var t=topOfStack(),w=t.w,b=swBounds(w),fromR=stack.length%2===0;
     var spd=(SPB()+score*SPI())*levelSpeedMul;
     if(levelId>=31){var accel=Math.min(1+Math.floor(score/5)*0.03,1.1);spd*=accel;}
-    // 移动方块始终在底部固定位置
-    cur={x:fromR?b.max:b.min, y:BLOCK_SPAWN_Y, w:w, color:nc(), dir:fromR?-1:1, speed:spd, baseSpeed:spd, spawnAnim:1.0};
+    var x=fromR?b.max:b.min;
+    x=Math.max(10,Math.min(x,W-w-10));  // 确保方块完整可见
+    cur={x:x, y:BLOCK_SPAWN_Y, w:w, color:nc(), dir:fromR?-1:1, speed:spd, baseSpeed:spd, spawnAnim:1.0, spawnTime:Date.now()};
     dp=0;status='playing';
   }
 
-  function dropBlock(){if(status!=='playing'||!cur)return;dp=0;dtY=topOfStack().y;status='dropping';}
+  function dropBlock(){
+    if(status!=='playing'||!cur)return;
+    if(Date.now()-cur.spawnTime<180)return;  // 防止双击秒杀，最少180ms滑动时间
+    dp=0;dtY=topOfStack().y;status='dropping';
+  }
 
   function placeBlock(){
     var b=cur,t=topOfStack(),bL=b.x,bR=b.x+b.w,sL=t.x,sR=t.x+t.w,oL=Math.max(bL,sL),oR=Math.min(bR,sR),oW=oR-oL;
@@ -281,6 +287,8 @@ function create(platform){
     if(score>bestScore){bestScore=score;wasNewBest=true;saveBest(bestScore);onNewBest(score);}
     stats.totalLayers++;flushStats();
     landAnim=8;
+    // 检查点：达到目标50%时记录
+    if(!checkpointScore&&score>=Math.floor(levelTarget*0.5))checkpointScore=score;
 
     // 堆叠偏移：每放一块堆叠整体上移一个块高，保持视觉效果固定
     stackOffset+=BH();
@@ -298,8 +306,18 @@ function create(platform){
       spawnPts(oL+oW/2,syoff,18,b.color,1.2);flashA=0.25;flashC='#ffd700';
       if(combo>=5)spawnPts(oL+oW/2,syoff,10,'#ffffff',1.5);
       if(combo>=3){var msgs=combo>=20?['👑 神之手!','🌟 无敌!','💎 传说!']:combo>=10?['🔥 炸裂!','⚡ 疯狂!','🎯 精准!']:combo>=5?['✨ 连击!','💪 厉害!','👏 漂亮!']:['👍 不错!','✅ 完美!','💯 满分!'];cpText=msgs[Math.floor(Math.random()*msgs.length)]+' x'+combo;cpColor=b.color;cpt=55;vibrate('light');sfxCombo();vibrate('heavy');}else{sfxPerfect();if(combo===0)vibrate('light');}
-    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,syoff,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);vibrate('medium');}}}
+    }else{combo=0;perfCount=0;shake=Math.max(0,10-oW*0.6);sfxPlace();if(oW>0&&oW<t.w*0.3){spawnPts(oL+oW/2,syoff,8,'rgba(255,180,0,0.8)',1);if(oW<t.w*0.15){shake=Math.max(shake,6);vibrate('medium');}}
+      // 切割偏差提示
+      if(oW<t.w*0.6){var devMsgs=['⚠ 偏了','✂ 偏差','👀 再对准'];cpText=devMsgs[Math.floor(Math.random()*devMsgs.length)];cpColor='#f97316';cpt=40;}
+    }
     cur=null;dp=0;
+
+    // 里程碑：每10层庆祝
+    if(score%10===0){
+      spawnPts(W/2,H*0.4,8,'#ffd700',1.5);
+      flashA=0.2;flashC='#ffd700';
+      cpText='🎯 '+score+' 层!';cpColor='#ffd700';cpt=40;
+    }
 
     if(score>=levelTarget){
       // 星级阈值随关卡递增而放缓（后期通关已极难，3星不应要求翻倍）
@@ -313,12 +331,14 @@ function create(platform){
   function completeLevel(stars){
     starsEarned=stars;
     if(mode==='level'){
-      var prev=stats.levelStars[levelId]||0;if(stars>prev){stats.levelStars[levelId]=stars;flushStats();persistStats();}
+      var prev=stats.levelStars[levelId]||0;if(stars>prev){stats.levelStars[levelId]=stars;flushStats();}
     }else{
-      var today=new Date().toISOString().slice(0,10),prev=stats.dailyBest[today]||0;if(stars>prev){stats.dailyBest[today]=stars;flushStats();persistStats();}
+      var today=new Date().toISOString().slice(0,10),prev=stats.dailyBest[today]||0;if(stars>prev){stats.dailyBest[today]=stars;flushStats();}
     }
     bgmStop();
+    // 先回调（写stars key），再persistStats，避免闪退时stars和stats不一致
     onLevelComplete({mode:mode,levelId:levelId,stars:stars,score:score,maxCombo:maxCombo,layers:stack.length,wasNewBest:wasNewBest});
+    persistStats();
     spawnPts(W/2,H/2,stars*10,stars>=3?'#ffd700':stars>=2?'#c0c0c0':'#cd7f32',2.5);
     flashA=0.5;flashC=stars>=3?'#ffd700':'#ffffff';sfxStar();
     checkAchievements({totalGames:stats.totalGames,score:score,maxCombo:maxCombo});
@@ -387,16 +407,32 @@ function create(platform){
     pi=Math.floor(Math.random()*pals.length);ci=0;
     stack=[];cur=null;score=0;combo=0;maxCombo=0;perfCount=0;starsEarned=0;
     camY=0;tCamY=0;pts=[];fps=[];dp=0;shake=0;flashA=0;cpt=0;cpText='';wasNewBest=false;
-    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;
+    slowMotionActive=false;slowMotionTimer=0;landAnim=0;stackOffset=0;checkpointScore=0;
     paused=false;bgmWasPlaying=false;
     status='idle';
   }
-  function refreshTheme(){themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;bgDirty=true;}
+  function refreshTheme(){
+    themeId=getTheme();var th=THEMES[themeId]||THEMES.default;pals=th.pals;bgColors=th.bg;bgDirty=true;
+    pi=0;ci=0;  // 重置颜色索引
+    // 重新着色已有方块，保持视觉一致
+    for(var si=0;si<stack.length;si++){stack[si].color=nc();}
+  }
   function unlockSkin(skinId){if(stats.unlockedSkins.indexOf(skinId)===-1){stats.unlockedSkins.push(skinId);flushStats();persistStats();checkAchievements({totalGames:stats.totalGames,score:score,maxCombo:maxCombo});}}
 
+  var DAILY_MUTATORS=[
+    {id:'speed',name:'极速模式',desc:'速度+30%',apply:function(s){s.speedMul*=1.3;}},
+    {id:'narrow',name:'刀锋之上',desc:'宽度-15%',apply:function(s){s.widthPct*=0.85;}},
+    {id:'no_combo',name:'孤军奋战',desc:'连击奖励关闭',apply:function(s){}},
+    {id:'endless',name:'无限挑战',desc:'关卡无上限',apply:function(s){}},
+  ];
   function getDailyChallenge(){
-    var today=new Date().toISOString().slice(0,10),h=hash(today),lv=LEVELS[5+(h%(LEVELS.length-5))];
-    return{levelId:lv.id,name:lv.name,target:lv.target,desc:lv.desc,speedMul:lv.speedMul};
+    var today=new Date().toISOString().slice(0,10),h=hash(today);
+    var lv=LEVELS[5+(h%(LEVELS.length-5))];
+    var mut=DAILY_MUTATORS[h%(DAILY_MUTATORS.length)];
+    var lv2={id:lv.id,name:lv.name,target:lv.target,desc:lv.desc,speedMul:lv.speedMul,widthPct:lv.widthPct};
+    if(mut)mut.apply(lv2);
+    lv2.mutator=mut;
+    return lv2;
   }
 
   function update(){
@@ -468,16 +504,20 @@ function create(platform){
       }
     }
 
-    // 堆叠方块（应用stackOffset使其视觉位置固定）
-    for(var i=0;i<stack.length;i++){
+    // 堆叠方块（应用stackOffset使其视觉位置固定，底部渐淡）
+    var stLen=stack.length;
+    for(var i=0;i<stLen;i++){
       var b=stack[i],dy=b.y-cam-stackOffset;
       if(dy>H+BH()||dy<-BH()*5)continue;
       var landSY=1;
-      if(i===stack.length-1&&landAnim>0){
+      if(i===stLen-1&&landAnim>0){
         var lp=landAnim/8;
         landSY=lp>0.5?lerp(1.0,0.88,(lp-0.5)*2):lerp(1.04,1.0,lp*1.5);
       }
-      dBlock(b.x,dy,b.w,BH(),b.color,1,0,landSY);
+      // 底部老化：越靠下的方块越透明
+      var age=(stLen-i-1)/Math.max(stLen,1);
+      var ageAlpha=age>0.7?lerp(1,0.5,(age-0.7)/0.3):1;
+      dBlock(b.x,dy,b.w,BH(),b.color,ageAlpha,0,landSY);
     }
 
     // 落点预览
@@ -586,7 +626,7 @@ function create(platform){
   var paused=false,bgmWasPlaying=false;
   function loop(){if(destroyed||paused)return;update();render();rafId=raf(loop);}
   function pauseEngine(){if(paused)return;paused=true;bgmWasPlaying=bgmPlaying;bgmStop();}
-  function resumeEngine(){if(!paused)return;paused=false;if(bgmWasPlaying)bgmStart();rafId=raf(loop);}
+  function resumeEngine(){if(!paused)return;paused=false;lastFrameTime=Date.now();if(bgmWasPlaying)bgmStart();rafId=raf(loop);}
   function onVisibility(){if(document.hidden){pauseEngine();}else{resumeEngine();}}
 
   function init(){
@@ -597,7 +637,7 @@ function create(platform){
     try{render();}catch(e){}
     loop();
   }
-  function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();}
+  function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();else if(status==='dropping')vibrate('light');}
   function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);rafId=null;}
   function resizeViewport(w,h){W=w;H=h;bgDirty=true;}
 
@@ -615,6 +655,7 @@ function create(platform){
     getLevelStars:function(lv){return stats.levelStars[lv]||0;},
     shareRefill:shareRefill,getShareRefillsLeft:getShareRefillsLeft,
     getSlowMotionActive:function(){return slowMotionActive;},
+    getCheckpointScore:function(){return checkpointScore;},
     bgmStart:bgmStart,bgmStop:bgmStop,bgmToggle:bgmToggle,
     THEMES:THEMES,ACHIEVEMENTS:ACHIEVEMENTS,LEVELS:LEVELS
   };
