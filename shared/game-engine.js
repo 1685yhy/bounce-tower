@@ -342,17 +342,20 @@ function create(platform){
       if(stats.tools.slow<=0)return false;
       stats.tools.slow--;flushStats();persistStats();
       slowMotionActive=true;slowMotionTimer=300;
+      cpText='🐢 慢动作！';cpColor='#64c8ff';cpt=50;  // 视觉反馈
       sfxTool();onUseTool('slow',stats.tools.slow);return true;
     }else if(toolName==='widen'){
       if(stats.tools.widen<=0)return false;
       stats.tools.widen--;flushStats();persistStats();
       if(stack.length>0){var top=stack[stack.length-1];top.w=IBW();top.x=Math.max(2,W/2-IBW()/2);}
+      cpText='📏 加宽！';cpColor='#ffd700';cpt=50;  // 视觉反馈
       sfxTool();spawnPts(W/2,H*0.6,20,'#ffd700',1.5);flashA=0.3;flashC='#ffd700';
       onUseTool('widen',stats.tools.widen);return true;
     }else if(toolName==='reverse'){
       if(stats.tools.reverse<=0)return false;
       stats.tools.reverse--;flushStats();persistStats();
       cur.dir*=-1;
+      cpText='🔄 反向！';cpColor='#a78bfa';cpt=50;  // 视觉反馈
       sfxTool();spawnPts(cur.x+cur.w/2,cur.y,8,'#64c8ff',1);
       onUseTool('reverse',stats.tools.reverse);return true;
     }
@@ -429,9 +432,12 @@ function create(platform){
     if(rot!==0||scaleY!==1){
       rrect(-w/2,-h/2,w,h,3,c);
     }else{
+      // 方块投影
+      ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;
       var g=ctx.createLinearGradient(-w/2,-h/2,-w/2,h/2);
       g.addColorStop(0,shade(c,20));g.addColorStop(0.3,c);g.addColorStop(1,shade(c,-40));
       rrect(-w/2,-h/2,w,h,6,g);
+      ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
       ctx.fillStyle='rgba(255,255,255,0.3)';
       ctx.fillRect(-w/2+4,-h/2+2,w-8,h*0.18);
       ctx.fillStyle='rgba(0,0,0,0.1)';
