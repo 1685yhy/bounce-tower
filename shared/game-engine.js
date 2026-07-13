@@ -593,7 +593,9 @@ function create(platform){
         dText(label,W/2,sY+32,12,'rgba(0,0,0,0.4)','center');
       }
     }else if(mode==='daily'){
-      dText(slowMotionActive?'🐢 '+Math.ceil(slowMotionTimer/60)+'s · 今日挑战':'📅 今日挑战',W/2,sY+32,12,'rgba(200,140,0,0.7)','center');
+      var dl=slowMotionActive?'🐢 '+Math.ceil(slowMotionTimer/60)+'s · ':'';
+      dl+='📅 今日挑战'+(dailyMutatorId?' ⚡'+dailyMutatorId:'');
+      dText(dl,W/2,sY+32,12,'rgba(200,140,0,0.7)','center');
     }
 
     if(combo>=2&&status!=='gameover'&&status!=='levelcomplete'){
@@ -650,7 +652,12 @@ function create(platform){
     try{render();}catch(e){}
     loop();
   }
-  function handleTap(){if(destroyed)return;if(status==='idle')spawnBlock();else if(status==='playing')dropBlock();else if(status==='dropping')vibrate('light');}
+  function handleTap(){
+    if(destroyed)return;
+    if(status==='playing'){flashA=0.12;flashC='#ffffff';dropBlock();return;}// 点击反馈
+    if(status==='idle'){spawnBlock();return;}
+    if(status==='dropping')vibrate('light');
+  }
   function destroy(){destroyed=true;persistStats();document.removeEventListener('visibilitychange',onVisibility);rafId=null;}
   function resizeViewport(w,h){W=w;H=h;bgDirty=true;}
 
