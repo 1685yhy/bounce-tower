@@ -21,7 +21,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 #grid div{width:50px;height:58px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:2px solid #f0e8dc;font-size:17px;font-weight:900;color:#555;cursor:pointer}
 #grid div:active{transform:scale(0.9)}
 #grid div.done{background:#f0fdf4;border-color:#86efac}
-#grid div.locked{opacity:0.25;cursor:default}
+#grid div.locked{opacity:0.25;cursor:default;pointer-events:none}
 #grid div small{font-size:8px;color:#b0a89a}
 #hud{position:absolute;top:20px;left:0;width:100%;text-align:center;z-index:5;pointer-events:none;font-size:13px;color:rgba(0,0,0,0.5)}
 #hud.hidden{display:none}
@@ -85,10 +85,10 @@ function S(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var game=BounceTower.create({
 ctx:X,width:innerWidth,height:innerHeight,
 loadBest:function(){return L('best',0)},saveBest:function(v){S('best',v)},
-requestAnimationFrame:function(fn){return setTimeout(fn,16)},playBeep:beep,
+requestAnimationFrame:function(fn){return requestAnimationFrame(fn)},playBeep:beep,
 onGameOver:function(sc,cb,ly,nb,m,li,lt){showPanel(0,sc,cb,ly,li,lt)},
 onNewBest:function(){},onAchievement:function(){},
-onLevelComplete:function(r){var s=S('stars',(L('stars',{})||{}));s[r.levelId]=r.stars;S('stars',s);S('lvl',Math.min(30,r.levelId+1));showPanel(1,r.score,r.maxCombo,r.layers,r.levelId,r.stars)},
+onLevelComplete:function(r){var s=L('stars',{})||{};var p=s[r.levelId]||0;if(r.stars>p){s[r.levelId]=r.stars;S('stars',s)}S('lvl',Math.min(30,r.levelId+1));showPanel(1,r.score,r.maxCombo,r.layers,r.levelId,r.stars)},
 onUseTool:function(){updateTools()},
 loadStats:function(){return L('stats',{totalGames:0,totalLayers:0,bestComboEver:0,totalPerfects:0,unlockedSkins:['default'],dailyStreak:0,lastPlayDate:'',unlockedAchievements:[],levelStars:{},dailyBest:{},tools:{slow:0,widen:0,reverse:0},levelAttempts:{},shareRefills:0})},
 saveStats:function(v){S('stats',v)},
@@ -113,7 +113,7 @@ var curLv,stars=L('stars',{});
 
 // Bind events (NOT inline onclick)
 document.getElementById('btnStart').addEventListener('click',function(){startGame(-1)});
-document.getElementById('btnStart').addEventListener('touchstart',function(e){e.preventDefault();startGame(-1)});
+document.getElementById('btnStart').addEventListener('touchstart',function(e){e.preventDefault();au();startGame(-1)});
 
 document.getElementById('grid').addEventListener('click',function(e){var lv=e.target.closest('[data-lv]');if(lv)startGame(parseInt(lv.dataset.lv))});
 
@@ -130,11 +130,11 @@ function startGame(id){
   curLv=id;
   var lv=BounceTower.LEVELS[id-1];
   game.setMode('level',{levelId:lv.id,target:lv.target,speedMul:lv.speedMul});
+  var st=game.getStats();st.tools.slow=1;st.tools.widen=1;st.tools.reverse=1;
   document.getElementById('home').classList.add('hidden');
   document.getElementById('hud').classList.remove('hidden');
   document.getElementById('tools').classList.remove('hidden');
   document.getElementById('hud').textContent='🎯 第'+lv.id+'关 · '+lv.name+' · 目标'+lv.target+'层';
-  game.addTool('slow',1);game.addTool('widen',1);game.addTool('reverse',1);
   updateTools();game.bgmStart();
 }
 
