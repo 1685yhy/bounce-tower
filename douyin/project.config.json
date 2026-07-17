@@ -1,6 +1,5 @@
 {
-  "description": "弹弹塔 - 超休闲堆叠小游戏（抖音版）",
-  "packOptions": { "ignore": [] },
+  "description": "弹弹塔 - 超休闲堆叠小游戏",
   "setting": {
     "urlCheck": true,
     "es6": true,
@@ -8,7 +7,7 @@
     "postcss": true,
     "minified": true
   },
-  "compileType": "miniprogram",
+  "compileType": "game",
   "appid": "tt3b984d25a5fc522502",
-  "projectname": "bounce-tower-douyin"
+  "projectname": "弹弹塔"
 }
