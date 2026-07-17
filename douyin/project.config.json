@@ -1,13 +1,1 @@
-{
-  "description": "弹弹塔 - 超休闲堆叠小游戏",
-  "setting": {
-    "urlCheck": true,
-    "es6": true,
-    "enhance": true,
-    "postcss": true,
-    "minified": true
-  },
-  "compileType": "game",
-  "appid": "tt3b984d25a5fc522502",
-  "projectname": "弹弹塔"
-}
+{"description":"弹弹塔 - 超休闲堆叠小游戏","setting":{"urlCheck":true,"es6":true,"enhance":true,"postcss":true,"minified":true},"compileType":"game","appid":"tt3b984d25a5fc522502","projectname":"弹弹塔"}

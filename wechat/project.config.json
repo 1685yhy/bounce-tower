@@ -43,7 +43,7 @@
     "swc": false,
     "disableSWC": true
   },
-  "compileType": "miniprogram",
+  "compileType": "game",
   "libVersion": "3.3.4",
   "appid": "wx9e6bd90be8ad2cd9",
   "projectname": "bounce-tower",
