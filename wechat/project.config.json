@@ -44,7 +44,7 @@
     "disableSWC": true
   },
   "compileType": "game",
-  "libVersion": "3.3.4",
+  "libVersion": "3.16.2",
   "appid": "wx9e6bd90be8ad2cd9",
   "projectname": "bounce-tower",
   "condition": {},
