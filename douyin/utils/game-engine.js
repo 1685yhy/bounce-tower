@@ -579,5 +579,5 @@ function create(platform){
   };
 }
 
-module.exports={create:create,THEMES:THEMES,ACHIEVEMENTS:ACHIEVEMENTS,LEVELS:LEVELS};if(typeof module!=='undefined')module.exports=global.BounceTower;
+global.BounceTower={create:create,THEMES:THEMES,ACHIEVEMENTS:ACHIEVEMENTS,LEVELS:LEVELS};if(typeof module!=='undefined')module.exports=global.BounceTower;
 })(typeof window!=='undefined'?window:(typeof global!=='undefined'?global:this));
